@@ -20,4 +20,8 @@ contract ByteTest{
         bytes1 public c=b[0]; 
        
         uint public a22=0x11;//可以16进制
+
+        //地址数组 ["0xb4D30Cac5124b46C2Df0CF3e3e1Be05f42119033","0x0e823fFE018727585EaF5Bc769Fa80472F76C3d7"]
+         bytes4[5] public  a25 = [bytes4(0x67676767),0x68686767,0x79686767,0x75686767];
+         uint[5] public fixedArr = [1,2,3,4,5];
 }
