@@ -19,5 +19,5 @@ contract ByteTest{
         bytes2 public b = 0x9788;//定长 数组 不可改变
         bytes1 public c=b[0]; 
        
-
+        uint public a22=0x11;//可以16进制
 }
