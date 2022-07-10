@@ -33,12 +33,42 @@ contract Call{
         emit Response(success, data); //释放事件
     }
 
-    function callHello(address _addr) external{
+    function callHello(address _addr) external{//address 不行 msg.data (bytes)：完整的 calldata。
         // call getAddress()
         (bool success, bytes memory data) = _addr.call(
-            abi.encodeWithSignature("getAddress()",_addr)
+            abi.encodeWithSignature("getAddress()")
         );
         emit Response(success, data); //释放事件
     }
+
+    function callHello2(address _addr) external{//有返回data
+        // call getAddress()
+        (bool success, bytes memory data) = _addr.call(
+            abi.encodeWithSignature("getAddress2()",_addr)
+        );
+        emit Response(success, data); //释放事件
+    }
+
+    function callHello3(address _addr) external{//有返回data
+        // call getAddress()
+        (bool success, bytes memory data) = _addr.call(
+            abi.encodeWithSignature("getAddress3()")
+        );
+        emit Response(success, data); //释放事件
+    }
+
+
+    //给fallbackTest 转账 函数
+
+    error CallFailed(); // 用call发送ETH失败error
+    function callETH(address payable _to, uint256 amount) external payable{
+        // 处理下call的返回值，如果失败，revert交易并发送error
+        (bool success,) = _to.call{value: amount}("");
+        if(!success){
+            revert CallFailed();
+        }
+    }
+
+     receive() external payable{}
 
 }
