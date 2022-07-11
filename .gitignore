@@ -1,1 +1,3 @@
-*/artifacts
+#忽略 a/artifacts a/a/artifacts 不上传编译文件
+
+**/artifacts
