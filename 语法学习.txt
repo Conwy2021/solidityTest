@@ -49,6 +49,11 @@ call， delegatecall 和 staticcall
 变长字节数组
 bytes 和 string 也是数组
 我们更多时候应该使用 bytes 而不是 bytes1[] ，因为Gas 费用更低, 在 内存memory 中使用 bytes1[] 时，会在元素之间添加31个填充字节。 而在 存储storage 中，由于紧密包装，这没有填充字节， 参考 bytes and string 。 作为一个基本规则，对任意长度的原始字节数据使用 bytes，对任意长度字符串（UTF-8）数据使用 string 。
+length: 数组有一个包含元素数量的length成员，memory数组的长度在创建后是固定的。
+push(): 动态数组和bytes拥有push()成员，可以在数组最后添加一个0元素。
+push(x): 动态数组和bytes拥有push(x)成员，可以在数组最后添加一个x元素。
+pop(): 动态数组和bytes拥有pop()成员，可以移除数组最后一个元素。
+
 结构体
 
 映射
@@ -123,6 +128,14 @@ approve： 调用者账户给`spender`账户授权 `amount`数量代币  A分给
 
 allowance：  返回`owner`账户授权给`spender`账户的额度，默认为0 C或D 查询A 分自己多少
 
+还有几个可选接口
+
+function name() constant returns (string name) //返回这个令牌的名字，比如"MyToken".
+
+function symbol() constant returns (string symbol)//返回令牌的符号，比如HIX.
+
+function decimals() constant returns (uint8 decimals)//返回token使用的小数点后几位， 比如 8,表示分配token数量为100000000
+----------------------------------------------------------------------------常用存储格式
 mapping (address => mapping (address => uint256)) allowed;　　// 类比二维数组
 
 mapping(address => uint256) balances;　　// 类比一维数组

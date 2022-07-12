@@ -10,7 +10,9 @@ contract YiChuTest{
         console.log(uint(b));
         uint c = a+b;
         console.log(c);
-
+        
      }
+
+    
 
 }
