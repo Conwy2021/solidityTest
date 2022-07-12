@@ -1,0 +1,111 @@
+语法汇总
+函数可见说明
+public: 内部外部均可见，并且自动给stoage变量生成 getter 函数 。
+private: 只能从本合约内部访问，继承的合约也不能用。
+external: 只能从合约外部访问（但是可以用this.f()来调用，f是函数名）
+internal: 只能从合约内部访问，继承的合约可以用。
+[pure|view|payable]：决定函数权限/功能的关键字。
+pure 包含pure关键字的函数，不能读取也不能写入存储在链上的状态变量。
+view/constant 包含view关键字的函数，能读取但也不能写入状态变量。
+都不写 函数既可以读取也可以写入状态变量。
+payable 运行的时候可以给合约转入ETH 就是说使用这个函数需要给合约转钱 可以转0 
+
+状态变量储存位置修饰符
+storage：变量储存在存储中，且需要在赋值之前提前预备空间，且多个同类型之间传值是指针地址引用。
+memory：变量储临时存在内存中，可以动态开辟空间。 
+calldata：只读的，且不会永久存储的位置。
+
+局部变量及状态变量的位置默认为storage，函数参数包括返回的参数都是memory
+外部函数的参数（非返回参数）的数据位置被强制指定为 calldata
+
+三种类型的数据结构 Structs Arrays mappings
+
+变量类型
+
+值类型 值传递
+布尔型 bool true false
+整型 int、uint
+定长浮点型 未完全支持
+默认值  bool 就是 false，uint、int 就是 0，string 就是空字符串。
+地址类型（重点）
+address：保存一个20字节的值（以太坊地址的大小）。
+0x111122223333444455556666777788889999aAaa 必须写全 20字节
+address payable ：可支付地址，与 address 相同，不过有成员函数 transfer 和 send 。
+balance 和 transfer 成员
+send 是 transfer 的低级版本。如果执行失败，当前的合约不会因为异常而终止，但 send 会返回 false
+call， delegatecall 和 staticcall
+
+定长字节数组 bytes1， bytes2， bytes3， …， bytes32
+可以将 bytes1[] 当作字节数组使用，但由于填充规则，每个元素会浪费 31 字节（storage存储除外），因此更好地做法是使用 bytes。
+
+引用类型
+如果使用引用类型，则必须明确指明数据存储哪种类型的位置（空间）里：
+内存memory 即数据在内存中，因此数据仅在其生命周期内（函数调用期间）有效。不能用于外部调用。
+存储storage 状态变量保存的位置，只要合约存在就一直存储．
+调用数据calldata 用来保存函数参数的特殊数据位置，是一个只读位置。
+
+数组
+ uint[] b;
+变长字节数组
+bytes 和 string 也是数组
+我们更多时候应该使用 bytes 而不是 bytes1[] ，因为Gas 费用更低, 在 内存memory 中使用 bytes1[] 时，会在元素之间添加31个填充字节。 而在 存储storage 中，由于紧密包装，这没有填充字节， 参考 bytes and string 。 作为一个基本规则，对任意长度的原始字节数据使用 bytes，对任意长度字符串（UTF-8）数据使用 string 。
+结构体
+
+映射
+
+delete a会让变量a的值变为初始值。
+
+
+error NotEnoughFunds(uint requested, uint available);
+使用
+    revert NotEnoughFunds(amount, balance);
+
+转帐相关
+	
+msg.data (bytes): 完整的 calldata 数据
+msg.sender (address): 消息调用者 (当前调用)
+msg.sig (bytes4): calldata的前 4 个字节 (如：函数签名)
+msg.value (uint): 与消息一起发送的以太币（wei为单位）
+
+/* 触发fallback() 还是 receive()?
+           接收ETH
+              |
+         msg.data是空？
+            /  \
+          是    否
+          /      \
+receive()存在?   fallback()
+        / \
+       是  否
+      /     \
+receive()  fallback   
+    */
+	必须存在receive() 或者fallback() 才能接收转账
+	
+call没有gas限制，最为灵活，是最提倡的方法； _to.call{value: amount}(""); _to 是address 这个address 是目标地址 返回两个参数 bool 和 bytes memory data
+transfer有2300 gas限制，但是发送失败会自动revert交易，是次优选择；  _to.transfer(amount); 无返回值
+send有2300 gas限制，而且发送失败不会自动revert交易，几乎没有人用它。 _to.send(amount);  返回值 bool
+
+合约调用合约
+我们可以利用合约的地址和合约代码（或接口）来创建合约的引用：_Name(_Address)，其中_Name是合约名，_Address是合约地址。然后用合约的引用来调用它的函数：_Name(_Address).f()，其中f()是要调用的函数。
+这个合约 可以存在相同代码 但是地址不同 的情况
+所以有 OtherContract(_Address).setX(x);  指定地址的合约进行调用
+
+加{value:msg.value} 会把交易中以太币传给下一个合约 不加 就给自己
+
+call是solidity官方推荐的通过触发fallback或receive函数发送ETH的方法。
+不推荐用call来调用另一个合约，因为当你调用不安全合约的函数时，你就把主动权交给了它。推荐的方法仍是声明合约变量后调用函数，见第21讲：调用其他合约
+当我们不知道对方合约的源代码或ABI，就没法生成合约变量；这时，我们仍可以通过call调用对方合约的函数。
+
+
+
+import "hardhat/console.sol"; 导入这个函数 就可以使用console.log 
+
+selfdestruct是智能合约的紧急按钮，销毁合约并将剩余ETH转移到指定账户。
+ // 调用selfdestruct销毁合约，并把剩余的ETH转给msg.sender
+        selfdestruct(payable(msg.sender));
+		
+// delegatecall和call类似，都是低级函数
+// call: B call C, 语境为 C (msg.sender = B, C中的状态变量受影响)
+// delegatecall: B delegatecall C, 语境为B (msg.sender = A, B中的状态变量受影响)
+// 注意B和C的数据存储布局必须相同！变量类型、声明的前后顺序要相同，不然会搞砸合约。
