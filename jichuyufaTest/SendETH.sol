@@ -17,13 +17,13 @@ contract SendETH {
 
     // 用transfer()发送ETH
     function transferETH(address payable _to, uint256 amount) external payable{
-        _to.transfer(amount);
+       _to.transfer(amount);
     }
 
     // send()发送ETH
     function sendETH(address payable _to, uint256 amount) external payable{
         // 处理下send的返回值，如果失败，revert交易并发送error
-        bool success = _to.send(amount);
+        bool success = _to.send(amount); 
         if(!success){
             revert SendFailed();
         }
@@ -32,7 +32,7 @@ contract SendETH {
     // call()发送ETH
     function callETH(address payable _to, uint256 amount) external payable{
         // 处理下call的返回值，如果失败，revert交易并发送error
-        (bool success,) = _to.call{value: amount}("");
+        (bool success,bytes memory data) = _to.call{value: amount}("");//call 返回两个参数
         emit Log("bool is",success);
         if(!success){
             revert CallFailed();
