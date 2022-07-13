@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: SimPL-3.0
 pragma solidity ^0.8.4;
 
-import { Strings } from "contracts/Library.sol";
+import { Strings } from "jichuyufaTest/Library.sol";
+import "hardhat/console.sol";
 contract Ints{
 
     uint8 a ;
@@ -19,9 +20,10 @@ contract Ints{
         
     }
 
-    function getA() public pure returns (uint256){
-
-        return 2**8;
+    function getA(uint a) public view returns (uint256){
+        uint256 max =type(uint256).max;//115792089237316195423570985008687907853269984665640564039457584007913129639935
+        console.log(max);
+        return 2**a-1;
     }
 
      // 直接通过库合约名调用

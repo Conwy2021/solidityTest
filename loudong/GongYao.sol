@@ -1,6 +1,21 @@
 pragma solidity ^0.4.4;
 import "hardhat/console.sol";
 
+
+/**验签 说明
+    需求:验证消息的发送者是否为对方
+    A 发送 字符串("abc") 给 B 附待一个签名数据
+
+    B 进行验签 
+    1.从签名数据中提取 r s v 值
+    2.将字符串abc进行keccak256 算下 得到0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45
+    3.已知 r s v 和 keccak256("abc")  根据ecrecover()验签函数 可得A公钥
+    4.对比放送方和计算的结果 一致 证明消息是对方发送的 验签完成
+
+    ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address) 利用椭圆曲线签名恢复与公钥相关的地址，错误返回零值。
+    uint8 wrongV = 17; // should normally be 27 or 28 可以将v1 改成17 就返回 0地址了
+**/
+
 contract GongYao{
 
     //公匙：0x60320b8a71bc314404ef7d194ad8cac0bee1e331
@@ -14,6 +29,10 @@ contract GongYao{
     bytes32  r = bytesToBytes32(slice(signedString, 0, 32));
     bytes32  s = bytesToBytes32(slice(signedString, 32, 32));
     byte  v = slice(signedString, 64, 1)[0];
+    console.logBytes32(r);
+    console.logBytes32(s);
+    console.logBytes32(v);
+    console.logBytes1(v);//打印类型不同
     return ecrecoverDecode(r, s, v);
   }
 
@@ -32,6 +51,7 @@ contract GongYao{
   function ecrecoverDecode  (bytes32 r, bytes32 s, byte v1) returns (address addr){
      uint8 v = uint8(v1) + 27;
      addr = ecrecover(hex"4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45", v, r, s);
+
   }
 
   //bytes转换为bytes32
