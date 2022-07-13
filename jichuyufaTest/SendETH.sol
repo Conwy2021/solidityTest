@@ -13,7 +13,7 @@ contract SendETH {
     // 构造函数，payable使得部署的时候可以转eth进去
     constructor() payable{}
     // receive方法，接收eth时被触发
-    receive() external payable{}
+    //receive() external payable{}
 
     // 用transfer()发送ETH
     function transferETH(address payable _to, uint256 amount) external payable{
@@ -30,7 +30,7 @@ contract SendETH {
     }
 
     // call()发送ETH
-    function callETH(address payable _to, uint256 amount) external payable{
+    function callETH(address payable _to, uint256 amount) external payable{//payable 在没有receive 或者fallback 函数的合约中 也是接收钱的 他的逻辑是把钱给这个函数 不是给这个合约再给这个函数
         // 处理下call的返回值，如果失败，revert交易并发送error
         (bool success,bytes memory data) = _to.call{value: amount}("");//call 返回两个参数
         emit Log("bool is",success);

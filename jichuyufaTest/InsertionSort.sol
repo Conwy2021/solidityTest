@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: SimPL-3.0
 pragma solidity ^0.8.0;
 
-contract  test5{
+contract  InsertionSort{
 
      // 插入排序 正确版
     function insertionSort(uint[] memory a) public pure returns(uint[] memory) {

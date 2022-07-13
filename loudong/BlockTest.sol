@@ -40,8 +40,15 @@ contract BlockTest{
     }
 
 
-    function test2() public view returns(bytes32){
-        return blockhash(block.number);
+    function test2(uint b) public view returns(bytes32,uint,bytes32,bytes32){//当前blockhash 返回是0 原因未知
+        console.log(block.number);
+        uint a =block.number;
+        console.logBytes32(blockhash(block.number));
+        bytes32 a47=blockhash(a);
+        console.logBytes32(blockhash(a));
+        bytes32 b49 =blockhash(b);
+        console.logBytes32(blockhash(b));
+        return (blockhash(block.number),a,a47,b49);
     }
 
 
