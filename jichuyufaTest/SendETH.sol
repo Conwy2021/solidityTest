@@ -8,7 +8,7 @@ pragma solidity ^0.8.4;
 
 error SendFailed(); // 用send发送ETH失败error
 error CallFailed(); // 用call发送ETH失败error
-
+import "hardhat/console.sol";
 contract SendETH {
     // 构造函数，payable使得部署的时候可以转eth进去
     constructor() payable{}
@@ -24,6 +24,7 @@ contract SendETH {
     function sendETH(address payable _to, uint256 amount) external payable{
         // 处理下send的返回值，如果失败，revert交易并发送error
         bool success = _to.send(amount); 
+        console.log("sendETH",success);
         if(!success){
             revert SendFailed();
         }
@@ -33,6 +34,7 @@ contract SendETH {
     function callETH(address payable _to, uint256 amount) external payable{//payable 在没有receive 或者fallback 函数的合约中 也是接收钱的 他的逻辑是把钱给这个函数 不是给这个合约再给这个函数
         // 处理下call的返回值，如果失败，revert交易并发送error
         (bool success,bytes memory data) = _to.call{value: amount}("");//call 返回两个参数
+        console.log("callETH",success);
         emit Log("bool is",success);
         if(!success){
             revert CallFailed();
