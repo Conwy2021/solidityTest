@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
 import '/bachang/SafeMath.sol';
-
+import "hardhat/console.sol";
 contract CoinFlip {
 
   using SafeMath for uint256;
@@ -15,7 +15,9 @@ contract CoinFlip {
 
   function flip(bool _guess) public returns (bool) { //返回
     uint256 blockValue = uint256(blockhash(block.number.sub(1))); //把blockvalue随机数设置为区块号-1然后进行hash 
-                                                                   //blockhash 返回类型是bytes32 转为unit256         
+    
+    console.logBytes32(blockhash(block.number.sub(1)));
+    console.log(blockValue);                                 //blockhash 返回类型是bytes32 转为unit256         
     if (lastHash == blockValue) { //上一次的值和这一次的值相等，防止循环 lastHash初始值 为0
       revert();
     }

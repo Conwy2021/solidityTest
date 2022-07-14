@@ -1,9 +1,10 @@
-pragma solidity ^0.4.22;
+// SPDX-License-Identifier: MITs
+pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 
 contract BlockTest{
 
-    function test6() public view returns(bytes32 _blockHash,bytes32 _blockHash2,uint number){
+    function test6() public payable returns(bytes32 _blockHash,bytes32 _blockHash2,uint number){
          number = block.number; // 当前区块号
          console.log("number",number);
         uint diff = block.difficulty; // 
@@ -27,8 +28,8 @@ contract BlockTest{
          console.log("_gasPrice",_gasPrice);
         address  _orign = tx.origin;//交易发起者（完全的调用链） a->b->c 则是a
          console.log("_orign",_orign);
-        uint  _now = now;//时间戳
-         console.log("now",now);
+        uint  _now = block.timestamp;//时间戳
+         console.log("now",_now);
 
          _blockHash=blockhash(number);//当前区块的hash 如果想知道前一个就减去1
         console.log("---_blockHash----");
@@ -40,15 +41,10 @@ contract BlockTest{
     }
 
 
-    function test2(uint b) public view returns(bytes32,uint,bytes32,bytes32){//当前blockhash 返回是0 原因未知
-        console.log(block.number);
-        uint a =block.number;
-        console.logBytes32(blockhash(block.number));
-        bytes32 a47=blockhash(a);
-        console.logBytes32(blockhash(a));
-        bytes32 b49 =blockhash(b);
-        console.logBytes32(blockhash(b));
-        return (blockhash(block.number),a,a47,b49);
+    function test2() public view returns(bytes32 b46,uint number45){//当前blockhash 返回是0 原因未知
+         number45 = block.number; // 当前区块号
+         b46=blockhash(number45);
+
     }
 
 
