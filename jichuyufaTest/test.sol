@@ -10,4 +10,14 @@ contract HelloWeb3{
        console.log("11",_string2);
    }
     
+    fallback() external payable{
+        console.log(msg.value);
+        console.logBytes(msg.data);
+    }
+    
+    function getBlance() public returns(uint a){
+        a=address(this).balance;
+    }
+
+    receive() external payable{}
 }

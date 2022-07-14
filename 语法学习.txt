@@ -12,9 +12,9 @@ payable 运行的时候可以给合约转入ETH 就是说使用这个函数需�
 payable 在没有receive 或者fallback 函数的合约中 也是可以接收钱的 他的逻辑是把钱给这个函数 不是给这个合约再给这个函数 
 
 状态变量储存位置修饰符
-storage：变量储存在存储中，且需要在赋值之前提前预备空间，且多个同类型之间传值是指针地址引用。
-memory：变量储临时存在内存中，可以动态开辟空间。 
-calldata：只读的，且不会永久存储的位置。
+storage：变量储存在存储中，且需要在赋值之前提前预备空间，且多个同类型之间传值是指针地址引用。
+memory：变量储临时存在内存中，可以动态开辟空间。 
+calldata：只读的，且不会永久存储的位置。
 
 局部变量及状态变量的位置默认为storage，函数参数包括返回的参数都是memory
 外部函数的参数（非返回参数）的数据位置被强制指定为 calldata
@@ -86,8 +86,9 @@ receive()存在?   fallback()
       /     \
 receive()  fallback   
     */
-	必须存在receive() 或者fallback() 才能接收转账
-	
+	必须存在receive() 或者带有 payable 的fallback() 才能接收转账
+    receive()函数不能有任何的参数，不能返回任何值，必须包含external和payable。
+	fallback()必须由external修饰，一般也会用payable修饰，用于接收ETH:fallback() external payable { ... }
 call没有gas限制，最为灵活，是最提倡的方法； _to.call{value: amount}(""); _to 是address 这个address 是目标地址 返回两个参数 bool 和 bytes memory data
 transfer有2300 gas限制，但是发送失败会自动revert交易，是次优选择；  _to.transfer(amount); 无返回值
 send有2300 gas限制，而且发送失败不会自动revert交易，几乎没有人用它。 _to.send(amount);  返回值 bool
