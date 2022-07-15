@@ -4,34 +4,40 @@ import "hardhat/console.sol";
 
 contract  JiSuan{
 
-    function testDiv(uint b,uint c) public{
+    event Log(string,uint);
+
+    function testDiv(uint256 b,uint256 c) public{
 
         uint a = b/c;
         console.log(a);
+       emit Log("testDiv",a);
     }
 
-    function testAdd(uint b,uint c) public{
+    function testAdd(uint256 b,uint256 c) public{
 
         uint a = b+c;
         console.log(a);
-
+ emit Log("testAdd",a);
     }
 
     function testSub(uint b,uint c) public{
 
         uint a = b-c;
         console.log(a);
+         emit Log("testSub",a);
     }
 
     function testMul(uint b,uint c) public{
 
         uint a = b*c;
         console.log(a);
+         emit Log("testMul",a);
     }
     function testmod(uint b,uint c) public{//取余数
 
         uint a = b%c;
         console.log(a);
+         emit Log("testmod",a);
     }
 
 }

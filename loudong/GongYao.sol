@@ -13,7 +13,7 @@ import "hardhat/console.sol";
     4.对比放送方和计算的结果 一致 证明消息是对方发送的 验签完成
 
     ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address) 利用椭圆曲线签名恢复与公钥相关的地址，错误返回零值。
-    uint8 wrongV = 17; // should normally be 27 or 28 可以将v1 改成17 就返回 0地址了
+    uint8 wrongV = 17; // should normally be 27 or 28  这里的意思是v1的值 要求是27 或者 28 但是函数中已经加了27  也就是说除了27 28 都会返回0地址公钥 
 **/
 
 contract GongYao{
@@ -29,10 +29,10 @@ contract GongYao{
     bytes32  r = bytesToBytes32(slice(signedString, 0, 32));
     bytes32  s = bytesToBytes32(slice(signedString, 32, 32));
     byte  v = slice(signedString, 64, 1)[0];
-    console.logBytes32(r);
-    console.logBytes32(s);
-    console.logBytes32(v);
-    console.logBytes1(v);//打印类型不同
+    console.logBytes32(r);//0xf4128988cbe7df8315440adde412a8955f7f5ff9a5468a791433727f82717a67
+    console.logBytes32(s);//0x53bd71882079522207060b681fbd3f5623ee7ed66e33fc8e581f442acbcf6ab8
+    console.logBytes32(v);//0x0000000000000000000000000000000000000000000000000000000000000000
+    console.logBytes1(v);//打印类型不同 0x00
     return ecrecoverDecode(r, s, v);
   }
 
