@@ -10,7 +10,7 @@ contract ReceiveETH {
         console.log(msg.value);
         console.logBytes(msg.data);
         console.logAddress(msg.sender);
-        emit Log(msg.value, gasleft());
+        emit Log(msg.value, gasleft());//gasleft() 剩余的gas
     }
     
     // 返回合约ETH余额
