@@ -63,6 +63,7 @@ contract ERC20 is IERC20 {
         balanceOf[msg.sender] -= amount;
         totalSupply -= amount;
         emit Transfer(msg.sender, address(0), amount);
+        
     }
 
 }

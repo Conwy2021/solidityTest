@@ -104,6 +104,10 @@ call是solidity官方推荐的通过触发fallback或receive函数发送ETH的�
 不推荐用call来调用另一个合约，因为当你调用不安全合约的函数时，你就把主动权交给了它。推荐的方法仍是声明合约变量后调用函数，见第21讲：调用其他合约
 当我们不知道对方合约的源代码或ABI，就没法生成合约变量；这时，我们仍可以通过call调用对方合约的函数。
 
+address call gas 和value 联合使用
+---------------------------
+address(nameReg).call{gas: 1000000, value: 1 ether}(abi.encodeWithSignature("register(string)", "MyName"));
+---------------------
 
 
 import "hardhat/console.sol"; 导入这个函数 就可以使用console.log 
@@ -116,6 +120,8 @@ selfdestruct是智能合约的紧急按钮，销毁合约并将剩余ETH转移�
 // call: B call C, 语境为 C (msg.sender = B, C中的状态变量受影响)
 // delegatecall: B delegatecall C, 语境为B (msg.sender = A, B中的状态变量受影响)
 // 注意B和C的数据存储布局必须相同！变量类型、声明的前后顺序要相同，不然会搞砸合约。
+调用delegatecall来使用storage变量时其实依据并不是变量名而是变量的存储位
+
 
 代币相关ERC20标准 用实际应用理解 最佳 例如众筹 A B 为原始股东  C D 为后面进来的人
 totalSupply: 返回代币总供给.
