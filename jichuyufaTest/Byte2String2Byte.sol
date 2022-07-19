@@ -31,4 +31,11 @@ contract Byte2String2Byte{
         //string tmp = string(b10);  // ERROR。不可以直接转换，可以通过1.和3.间接转换
     }
 
+    function stringTOByte() public {
+
+        bytes4 bytestest36 ="1a";
+
+        console.logBytes4(bytestest36);//0x31610000
+    }
+
 }

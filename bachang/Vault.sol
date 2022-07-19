@@ -16,5 +16,6 @@ contract Vault {
     }
   }
 
-  //在console 中 执行eth.getStorageAt("0x43A6c041C7BfeC90892EdE78629F74ACCaaf1935",1); 可以获取到password的值. 第一个参数表示 合约部署地址,第二个参数是全局第几个变量.(0开始)
+  //在console 中 执行eth.getStorageAt("0x260a7Fe2f46053518E061e96A9e2a88dBfcab2A6",1); 可以获取到password的值. 第一个参数表示 合约部署地址,第二个参数是全局第几个变量.(0开始)
+  //在remix 控制台 执行web3.eth.getStorageAt("0x260a7Fe2f46053518E061e96A9e2a88dBfcab2A6",1);
 }
