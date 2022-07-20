@@ -44,7 +44,7 @@ contract GatekeeperOne {
 
       bytes8 b8=0x0000000000000000;
         
-      bytes8 b8=b8+bytes8(0x0000000000000001);
+      //bytes8 b8=b8+bytes8(0x0000000000000001);
 
   }
 }
