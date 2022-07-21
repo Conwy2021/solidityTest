@@ -34,4 +34,16 @@ contract keccak256Test{
         console.logBytes32(kec);
 
     }
+
+    function keccakTest38() public {
+
+        for(uint8 i=0;i<2**16;i++){
+           bytes32 kec= keccak256(i);
+           if(kec==0xdb81b4d58595fbbbb592d3661a34cdca14d7ab379441400cbfa1b78bc447c365){
+               console.log(uint(i));
+               break;
+           }
+
+        }
+    }
 }

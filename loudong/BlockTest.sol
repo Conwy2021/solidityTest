@@ -9,7 +9,7 @@ contract BlockTest{
          console.log("number",number);
         uint diff = block.difficulty; // 
          console.log("diff",diff);
-        uint time = block.timestamp; // 
+        uint time = block.timestamp; //  目前区块时间戳
          console.log("time",time);
         uint gas = block.gaslimit;
          console.log("gas",gas);
