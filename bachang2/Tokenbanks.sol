@@ -93,7 +93,7 @@ contract TokenBankChallenge {//0x12B74819aA2b9a6e7Bc49E9ad4a14abd5C9da265 靶场
         return token.balanceOf(this) == 0;
     }
 
-    function tokenFallback(address from, uint256 value, bytes) public {//此函数为从代币合约转币到此银行合约
+    function tokenFallback(address from, uint256 value, bytes) public {
         require(msg.sender == address(token));
         require(balanceOf[from] + value >= balanceOf[from]);
 
