@@ -174,3 +174,8 @@ ASCII码值 0 表示空字符，空字符就是平时所说的 '\0'。
 Guess the new number 靶场笔记
 一个函数中 产生的操作（转账） 都在一个交易下 所以在一个函数中算出一个结果 再调用另外一个函数去算一个结果 两个结果是一样的
 也就是可以提前算出答案后，传递给另一个函数达到 答案一定正确
+
+---日志打印事件（可以理解成日志）----
+1、合约中打印事件 每次调用了合约中打印事件的方法 都会在合约中（链浏览器）上查看到  例如https://rinkeby.etherscan.io/address/0xdbccBf8eD1F63adb8a0b188Fb76FCE8a941cd5f1#events
+2、交易中调用了其他合约或者说触发了其他合约的打印事件 那么在本次交易中也会打印这个日志 例如 https://rinkeby.etherscan.io/tx/0x58f95b08ccf6e5d0719fd60511c95bc3d324a6f8a275c9fd8bd9f8cf282fd16b#eventlog
+对应代码为 king_Attack.sol
