@@ -6,7 +6,7 @@ contract  JiSuan{
 
     event Log(string,uint);
 
-    function testDiv(uint256 b,uint256 c) public{
+    function testDiv(uint256 b,uint256 c) public{//取整   4.1 =4   4.9=4
 
         uint a = b/c;
         console.log(a);
