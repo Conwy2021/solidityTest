@@ -16,6 +16,16 @@ contract Byte2String2Byte{
         bytes memory d =bytes("asfsfs");
     }
 
+    function test2() public {
+
+        bytes32 a =bytes32('ok');
+         console.logBytes32(a);//0x6f6b000000000000000000000000000000000000000000000000000000000000
+        uint256 b =uint256(a); 
+        console.log(b);//50395778828673856232704394613690264826947323190583279542502573679469393870848
+        string memory c =string(bytes('ok'));
+        console.log(c);//ok
+    }
+
     //1. 定长字节数组-->变长字节数组  （拷贝）
     //bytes bs10 = b10;  // ERROR
     bytes public bs10 = new bytes(b10.length);
