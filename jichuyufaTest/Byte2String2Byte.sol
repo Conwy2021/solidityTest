@@ -24,6 +24,10 @@ contract Byte2String2Byte{
         console.log(b);//50395778828673856232704394613690264826947323190583279542502573679469393870848
         string memory c =string(bytes('ok'));
         console.log(c);//ok
+        bytes memory d =bytes("ok");
+        console.logBytes(d);//0x6f6b
+
+
     }
 
     //1. 定长字节数组-->变长字节数组  （拷贝）
