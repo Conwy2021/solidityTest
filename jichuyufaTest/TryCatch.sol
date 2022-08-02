@@ -47,8 +47,8 @@ contract TryCatch {
     }
 
     // 在创建新合约中使用try-catch （合约创建被视为external call）
-    // executeNew(0)会失败并释放`CatchEvent`
-    // executeNew(1)会失败并释放`CatchByte`
+    // executeNew(0)会失败并释放`CatchEvent`// catch revert
+    // executeNew(1)会失败并释放`CatchByte`// catch assert
     // executeNew(2)会成功并释放`SuccessEvent`
     function executeNew(uint a) external returns (bool success) {
         try new OnlyEven(a) returns(OnlyEven _even){

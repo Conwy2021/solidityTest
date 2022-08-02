@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 contract Attack{
-
+        
         event Init(string,address);
      constructor() public{
          emit Init("Init2 ok",msg.sender);
@@ -16,6 +16,7 @@ contract Attack{
         event Log(string,address);
     fallback() external payable{
        emit Log("attack in fallback2",msg.sender);
-       revert();
+       //revert();
     }
 }
+

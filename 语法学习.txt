@@ -90,7 +90,7 @@ receive()  fallback
     */
 	必须存在receive() 或者带有 payable 的fallback() 才能接收转账
     receive()函数不能有任何的参数，不能返回任何值，必须包含external和payable。
-	fallback()必须由external修饰，一般也会用payable修饰，用于接收ETH:fallback() external payable { ... }
+	fallback()必须由external修饰，一般也会用payable修饰，用于接收ETH:fallback() external payable { ... } 这个函数不能有参数也不能有返回值
 call没有gas限制，最为灵活，是最提倡的方法； _to.call{value: amount}(""); _to 是address 这个address 是目标地址 返回两个参数 bool 和 bytes memory data
 transfer有2300 gas限制，但是发送失败会自动revert交易，是次优选择；  _to.transfer(amount); 无返回值
 send有2300 gas限制，而且发送失败不会自动revert交易，几乎没有人用它。 _to.send(amount);  返回值 bool
