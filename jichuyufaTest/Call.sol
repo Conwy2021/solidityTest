@@ -5,9 +5,9 @@ contract Call{
     // 定义Response事件，输出call返回的结果success和data
     event aa(bool success, bytes data);
     event bb(string,string);
-    function callSetX(address payable _addr, uint256 x) public payable {
+    function callSetX(address payable _addr, uint256 x,uint256 gasTest) public payable {//开始是13563
         // call setX()，同时可以发送ETH
-        (bool success, bytes memory data) = _addr.call{value: msg.value}(
+        (bool success, bytes memory data) = _addr.call{gas: gasTest,value: msg.value}(//x=1时gas消耗为2621
             abi.encodeWithSignature("setX(uint256)", x)
         );
 
