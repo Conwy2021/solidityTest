@@ -22,15 +22,29 @@ contract HelloWeb3{
         a=address(this).balance;
     }
     uint256 public a;
-    function test2(uint256 _a) view public  {//编译会报错 但是可以部署 并赋值成功
-         a = _a;
-    }
+    // function test2(uint256 _a) view public  {//编译会报错 但是可以部署 并赋值成功
+    //      a = _a;
+    // }
 
     function getA() public returns (uint256 ){
        return a;
     }
     receive() external payable{
         console.log(msg.value);
+    }
+
+
+    function test37() public {
+
+        uint256 a1= 256;
+
+    }
+
+    function test38() public {
+
+         uint256 a1= 256;
+          uint256 a2= 256;
+        
     }
 
 }

