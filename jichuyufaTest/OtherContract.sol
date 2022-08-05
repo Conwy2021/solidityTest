@@ -17,6 +17,7 @@ contract OtherContract {
 
     // 可以调整状态变量_x的函数，并且可以往合约转ETH (payable)
     function setX(uint256 x) external payable{
+       assert(false);//0.5.4 版本 传过来的gas 不会返回传过来的 
         _x = x;
         // 如果转入ETH，则释放Log事件
         if(msg.value > 0){
