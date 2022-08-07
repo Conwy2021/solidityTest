@@ -16,7 +16,7 @@ contract test3{
         uint voteCount; // 得票数
     }
 
-    int[] public array =[0,1,2];
+    uint256[] public array =[0,1,2];
 
     mapping(string => string) public voters;
 

@@ -21,30 +21,44 @@ contract HelloWeb3{
     function getBlance() public returns(uint a){
         a=address(this).balance;
     }
-    uint256 public a;
-    // function test2(uint256 _a) view public  {//编译会报错 但是可以部署 并赋值成功
-    //      a = _a;
-    // }
+    uint256 public a24 =1;
+    function test2(uint256 _a)  public view returns (uint256) {//编译会报错 偶尔可以部署（实际是无法部署的） 但是数据会出现错乱（改有返回值无返回值）
+        uint256  a24 = _a;                                              //刷新浏览器第一编译时部署时因为编译报错 无deploy按钮
+       return a24;                                              // 初步认为 当编译报错时 部署的是之前正确编译的代码 并不是当前代码 之前搞错了
+    }
 
-    function getA() public returns (uint256 ){
-       return a;
+    function getA() public view returns (uint256 ){//view 可以让请求不需要gas 
+       return a24;
     }
     receive() external payable{
         console.log(msg.value);
     }
 
 
-    function test37() public {
+    function test37() public view returns(uint256){
 
         uint256 a1= 256;
+        for(uint256 i=0;i<100;i++){
+
+        a1=a1+1;
+        }
+        return a1;
 
     }
-
-    function test38() public {
+    uint256 a25 = 100;
+    function test38() public view returns(uint256){
 
          uint256 a1= 256;
           uint256 a2= 256;
+            uint256 _a25=a25;
+
+        return a25;
+    }
+
+    function setA25(uint256 _a) public {
         
+        a25=_a;
+
     }
 
 }
