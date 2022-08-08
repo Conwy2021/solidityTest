@@ -40,10 +40,15 @@ contract BlockTest{
 
     }
 
-
-    function test2() public view returns(bytes32 b46,uint number45){//当前blockhash 返回是0 原因未知
+     event Log(string,uint256);
+    function test2() public  returns(bytes32 b46,uint number45){//当前blockhash 返回是0 以太坊黄皮书有说明 也有可能因为当前区块会回滚之类的
          number45 = block.number; // 当前区块号
          b46=blockhash(number45);
+         uint256 chainId =block.chainid;//链id 
+        console.log("chainId is ",chainId);
+        emit Log("chainId is ",chainId);//rinkeby 是 4 ropsten 是 3 这个id 是唯一的 chainIdList 清单 https://chainlist.org/zh
+       
+
 
     }
 
