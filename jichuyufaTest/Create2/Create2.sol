@@ -47,7 +47,7 @@ contract PairFactory2{
             // 计算合约地址方法 hash()
             predictedAddress = address(uint160(uint(keccak256(abi.encodePacked(
                 bytes1(0xff),//一个常量
-                address(this),//创建者的地址
+                address(this),//创建者的地址 是这个工厂地址 每次部署会变化  同一个地址 不能两次部署 
                 salt,//盐值
                 keccak256(type(Pair).creationCode)//合约的代码
             )))));

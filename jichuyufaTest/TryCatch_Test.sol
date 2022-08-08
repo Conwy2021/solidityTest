@@ -50,7 +50,8 @@ contract TryCatchTest {
         console.log('success-->',success);
         console.logBytes32(bytes32(data));//0x0000000000000000000000000000000000000000000000000000000000000020
         console.log('data-->',string(data));//data-->  ok
-           
+        string memory h =abi.decode(data, (string));
+        console.log("abi.decode -->",h);
         console.logBytes(data);
         //0x
 // 0000000000000000000000000000000000000000000000000000000000000020 经过测试猜想 这个段表示用32byte存储
@@ -113,6 +114,6 @@ contract TryCatchTest2{
         //to.call{value:amount};
        to.transfer(amount);
 
-        return 'oka';
+        return 'ok';
     }
 }
