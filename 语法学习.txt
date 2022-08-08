@@ -123,6 +123,9 @@ CREATE 新地址 = hash(创建者地址, nonce)
 CREATE2 新地址 = hash("0xFF",创建者地址, salt, bytecode)
 使用 Contract x = new Contract{salt: _salt, value: _value}(params)
 其中Contract是要创建的合约名，x是合约对象（地址），_salt是指定的盐；如果构造函数是payable，可以创建时转入_value数量的ETH，params是新合约构造函数的参数。
+
+可以向预地址打钱 通过create2.sol 验证成功    这边重点说明下 地址 是都存在的 只要满足20btyes要求  只是说这个地址上有没有账号或者合约
+所以说 不能说不存在的地址 
 ----------------------- 
 import "hardhat/console.sol"; 导入这个函数 就可以使用console.log 
 
