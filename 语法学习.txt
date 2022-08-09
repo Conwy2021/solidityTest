@@ -205,3 +205,12 @@ Guess the new number 靶场笔记
 
 相关金融产品概念解释
 https://wenx.zendesk.com/hc/zh-cn/categories/360002543352-%E6%B0%B8%E7%BB%AD%E5%90%88%E7%BA%A6-%E6%9D%A0%E6%9D%86-ETF
+
+-------ERC721-----------
+interfaceId  查询接口是否实现要求的接口
+
+例如 0x5b5e139f 计算就是:bytes4(keccak256(ERC721Metadata.name.selector)^keccak256(ERC721Metadata.symbol.selector)^keccak256(ERC721Metadata.tokenURI.selector))
+
+ ^ （异或）
+ 转发来自 https://www.liaoxuefeng.com/article/1461241857966113
+ NFT有两个标准：EIP-721和EIP-1155。721标准比较简单，它只需要保证一个NFT对应一个唯一的Token ID就行，因为一个Token ID对应的NFT只有一个，而1155就要宽松一点，一个NFT可以有多个，比如一个头像有10个，那最多允许10个人持有。如果每个NFT只发1个，那就和721没啥区别了。
