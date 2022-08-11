@@ -16,6 +16,10 @@ contract Attack {
     }
   
 
+    function init2(Telephone tel,address _owner) public {
+
+        tel.changeOwner(_owner);// 还可以这种初始化合约  传入合约或接口 是官方推荐的项目
+    }
     function attackGO(address _owner) public {
     
         tel.changeOwner(_owner);
