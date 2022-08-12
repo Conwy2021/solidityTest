@@ -95,6 +95,13 @@ call没有gas限制，最为灵活，是最提倡的方法； _to.call{value: am
 transfer有2300 gas限制，但是发送失败会自动revert交易，是次优选择；  _to.transfer(amount); 无返回值
 send有2300 gas限制，而且发送失败不会自动revert交易，几乎没有人用它。 _to.send(amount);  返回值 bool
 
+
+---------单位相关------------------
+ether   1e18 wei
+finney  1e15 wei
+Gwei    1e9 wei
+wei     1
+
 ---------合约调用合约------------
 我们可以利用合约的地址和合约代码（或接口）来创建合约的引用：_Name(_Address)，其中_Name是合约名，_Address是合约地址。然后用合约的引用来调用它的函数：_Name(_Address).f()，其中f()是要调用的函数。
 这个合约 可以存在相同代码 但是地址不同 的情况
