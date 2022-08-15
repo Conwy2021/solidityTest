@@ -58,7 +58,7 @@ library UniswapV2Library {
         amountIn = (numerator / denominator).add(1);
     }
 
-    // performs chained getAmountOut calculations on any number of pairs
+    // performs chained getAmountOut calculations on any number of pairs //todo path 存的是代币地址
     function getAmountsOut(address factory, uint amountIn, address[] memory path) internal view returns (uint[] memory amounts) {
         require(path.length >= 2, 'UniswapV2Library: INVALID_PATH');
         amounts = new uint[](path.length);
