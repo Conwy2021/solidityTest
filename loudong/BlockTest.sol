@@ -52,6 +52,13 @@ contract BlockTest{
 
     }
 
-
+    function test55() public {
+        uint time = block.timestamp; //  目前区块时间戳  time 1660639670
+         console.log("time",time);
+         uint32 time2 =uint32(uint(4294967296));
+         console.log('uint32T',time2);
+         uint32 blockTimestamp = uint32(uint(4294967297) % 2**32);
+        console.log('blockTimestamp',blockTimestamp);
+    }
 
 }
