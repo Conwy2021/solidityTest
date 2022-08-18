@@ -13,9 +13,13 @@ contract uint224Test{
 
         console.log(_a);
 
-        
-
+    
     }
 
+    function test21() public {
 
+        uint32 a=uint32(4294967296);//4294967296=2**32
+        console.log(a);//0
+        
+    }
 }
