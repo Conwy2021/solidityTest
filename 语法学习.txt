@@ -238,3 +238,9 @@ interfaceId  查询接口是否实现要求的接口
 
   套利 两个交易所 存在价格差  假设有一种代币T，它在去中心化交易所DEX A的价格是50USDT，而在去中心化交易所DEX B的价格是55USDT。
 
+  时间加权平均价 uniswp v2 提供一种线上获取价格的方法 需要自己去调用或者使用定时任务去获取。
+  每次swap burn mint 操作 都会更新 累计价格（每个块的第一笔交易）
+  公式 price0CumulativeLast = price0Cumulative + reserve1 / reserve0 * timeElapsed
+
+  impermanent loss是指你将加密货币放入uniswap中赚取的收益与你将加密货币放入钱包中的收益之间的差
+  初步理解 时 可以把一个币算成稳定币 好理解些
