@@ -97,7 +97,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
                 if (rootK > rootKLast) {
                     uint numerator = totalSupply.mul(rootK.sub(rootKLast));
                     uint denominator = rootK.mul(5).add(rootKLast);
-                    uint liquidity = numerator / denominator;
+                    uint liquidity = numerator / denominator;//这部分计算为增加的0.3%手续费x1/6是多少 
                     if (liquidity > 0) _mint(feeTo, liquidity);
                 }
             }
@@ -114,7 +114,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
         uint amount0 = balance0.sub(_reserve0);
         uint amount1 = balance1.sub(_reserve1);
 
-        bool feeOn = _mintFee(_reserve0, _reserve1);//添加流动性时 检查下kLast变化 变多了就给项目方费用
+        bool feeOn = _mintFee(_reserve0, _reserve1);//这一步其实是结算项目方的钱 检查下kLast变化 变多了就给项目方费用
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         if (_totalSupply == 0) {
             liquidity = Math.sqrt(amount0.mul(amount1)).sub(MINIMUM_LIQUIDITY);//减1000的解析https://learnblockchain.cn/article/3004
@@ -138,8 +138,8 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
         uint balance0 = IERC20(_token0).balanceOf(address(this));
         uint balance1 = IERC20(_token1).balanceOf(address(this));
         uint liquidity = balanceOf[address(this)];
-
-        bool feeOn = _mintFee(_reserve0, _reserve1);//去除流动性时 检查下kLast变化 变多了就给项目方费用
+        //可以把LP 理解为股份 投入多少就有多少股 一股表示两个代币的价值 1LP价值 2个代币的价值
+        bool feeOn = _mintFee(_reserve0, _reserve1);//这一步就是检测利润增多没 检查下kLast变化 变多了就给项目方费用
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
         amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
