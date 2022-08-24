@@ -146,6 +146,12 @@ selfdestruct是智能合约的紧急按钮，销毁合约并将剩余ETH转移�
 // 注意B和C的数据存储布局必须相同！变量类型、声明的前后顺序要相同，不然会搞砸合约。
 调用delegatecall来使用storage变量时其实依据并不是变量名而是变量的存储位
 
+----合约类型相关----
+
+如果未实现合约中的至少一个函数，则需要将合约标记为 abstract。 即使实现了所有功能，合同也可能被标记为abstract。
+
+如果合约继承自抽象合约，并且没有通过重写来实现所有未实现的函数， 它依然需要标记为抽象 abstract 合约.
+
 
 代币相关ERC20标准 用实际应用理解 最佳 例如众筹 A B 为原始股东  C D 为后面进来的人
 totalSupply: 返回代币总供给.
@@ -248,4 +254,9 @@ interfaceId  查询接口是否实现要求的接口
 
   UniswapV2 使用的价格预言机称为 TWAP（Time-Weighted Average Price） ，即时间加权平均价格 。  
   计算时间间隔为 1 小时的 TWAP，取自开始和结束时的累计价格和两区块当时的时间戳，两者的累计价格相减，再除以两者之间的时间差，就算出这 1 小时内的 TWAP 价格
+
+  ----uniswapv2 质押合约 ---
+工厂合约操作
+  1、deploy部署抵押合约
+  2、调用notifyRewardAmounts 下发UNI奖励代币 及初始化挖矿速率（提前把UNI代币打到工厂合约） 更新lastUpdateTime为当前时间 更新挖矿结束时间挖矿periodFinish
   
