@@ -71,7 +71,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
     }//计算出增量的每单位质押代币的挖矿奖励，再乘以用户的质押余额得到增量的总挖矿奖励，再加上之前已存储的挖矿奖励，就得到当前总的挖矿奖励
      
     function getRewardForDuration() external view returns (uint256) {
-        return rewardRate.mul(rewardsDuration);
+        return rewardRate.mul(rewardsDuration);//rewardRate*rewardsDuration（抵押时间60days）
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
