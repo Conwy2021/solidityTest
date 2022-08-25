@@ -75,7 +75,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
-
+    //这个函数 也是给代币人用的 只不过中间是签名授权 少一部gas消耗（approve）
     function stakeWithPermit(uint256 amount, uint deadline, uint8 v, bytes32 r, bytes32 s) external nonReentrant updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
         _totalSupply = _totalSupply.add(amount);
