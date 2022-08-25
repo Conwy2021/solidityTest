@@ -46,4 +46,9 @@ contract keccak256Test{
 
         }
     }
+
+     function test50() public {
+        bytes32 a= keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+        console.logBytes32(a);
+    }
 }
