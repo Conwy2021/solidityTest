@@ -84,7 +84,7 @@ contract UniswapV2ERC20 is IUniswapV2ERC20 {
             abi.encodePacked(
                 '\x19\x01',
                 DOMAIN_SEPARATOR,
-                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))//nonces[owner]++ 先取值使用
             )
         );
         address recoveredAddress = ecrecover(digest, v, r, s);
