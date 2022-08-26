@@ -6,7 +6,7 @@ pragma solidity =0.5.16;
 // resolution: 1 / 2**112
 
 library UQ112x112 {
-    uint224 constant Q112 = 2**112;
+    uint224 constant Q112 = 2**112;//5192296858534827628530496329220096
 
     // encode a uint112 as a UQ112x112
     function encode(uint112 y) internal pure returns (uint224 z) {
