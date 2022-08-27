@@ -255,6 +255,12 @@ interfaceId  查询接口是否实现要求的接口
   UniswapV2 使用的价格预言机称为 TWAP（Time-Weighted Average Price） ，即时间加权平均价格 。  
   计算时间间隔为 1 小时的 TWAP，取自开始和结束时的累计价格和两区块当时的时间戳，两者的累计价格相减，再除以两者之间的时间差，就算出这 1 小时内的 TWAP 价格
 
+  pair 合约中是swap
+  传入的参数为amountOut  需要计算amountIn
+  一般场景 amountOut ==0 amountIn!=0 ; amountOut !=0 amountIn=0
+  那么什么场景会出现 amountIn amountOut 都不为0 呢
+  闪电贷 先出代币 然后再还代币 就会出现这种场景 
+  balance0 = reserve0 + amount0In - amout0Out  amountIn = balance - (reserve - amountOut)
   ----uniswapv2 质押合约 ---
 工厂合约操作
   1、deploy部署抵押合约
