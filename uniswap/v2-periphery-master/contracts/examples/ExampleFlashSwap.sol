@@ -8,8 +8,10 @@ import '../interfaces/V1/IUniswapV1Exchange.sol';
 import '../interfaces/IUniswapV2Router01.sol';
 import '../interfaces/IERC20.sol';
 import '../interfaces/IWETH.sol';
-
+// 这是闪电兑换合约 借ERC20代币 然后 还WETH  或者借WETH 还ERC20代币
+// 这个代码是在uniswapV1和V2上进行套利  在v2合约中借出 然后到v1中
 contract ExampleFlashSwap is IUniswapV2Callee {
+
     IUniswapV1Factory immutable factoryV1;
     address immutable factory;
     IWETH immutable WETH;
@@ -44,17 +46,17 @@ contract ExampleFlashSwap is IUniswapV2Callee {
         IERC20 token = IERC20(path[0] == address(WETH) ? path[1] : path[0]);
         IUniswapV1Exchange exchangeV1 = IUniswapV1Exchange(factoryV1.getExchange(address(token))); // get V1 exchange
 
-        if (amountToken > 0) {
+        if (amountToken > 0) {//当传入的是ERC20代币
             (uint minETH) = abi.decode(data, (uint)); // slippage parameter for V1, passed in by caller
             token.approve(address(exchangeV1), amountToken);
-            uint amountReceived = exchangeV1.tokenToEthSwapInput(amountToken, minETH, uint(-1));
-            uint amountRequired = UniswapV2Library.getAmountsIn(factory, amountToken, path)[0];
+            uint amountReceived = exchangeV1.tokenToEthSwapInput(amountToken, minETH, uint(-1));//这是交易V1*取出*这些amountToken需要出多少ETH
+            uint amountRequired = UniswapV2Library.getAmountsIn(factory, amountToken, path)[0];//计算V2*取出*这些amountToken需要多少个ETH
             assert(amountReceived > amountRequired); // fail if we didn't get enough ETH back to repay our flash loan
-            WETH.deposit{value: amountRequired}();
+            WETH.deposit{value: amountRequired}();//// ETH -> WETH:
             assert(WETH.transfer(msg.sender, amountRequired)); // return WETH to V2 pair
             (bool success,) = sender.call{value: amountReceived - amountRequired}(new bytes(0)); // keep the rest! (ETH)
             assert(success);
-        } else {
+        } else {//当传入的是WETH代币时
             (uint minTokens) = abi.decode(data, (uint)); // slippage parameter for V1, passed in by caller
             WETH.withdraw(amountETH);
             uint amountReceived = exchangeV1.ethToTokenSwapInput{value: amountETH}(minTokens, uint(-1));
