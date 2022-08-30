@@ -413,7 +413,7 @@ def tokenToExchangeTransferOutput(tokens_bought: uint256, max_tokens_sold: uint2
 # @return Amount of Tokens that can be bought with input ETH.
 @public
 @constant
-def getEthToTokenInputPrice(eth_sold: uint256(wei)) -> uint256:
+def getEthToTokenInputPrice(eth_sold: uint256(wei)) -> uint256:#输入这么多的eth 可以换出多少token
     assert eth_sold > 0
     token_reserve: uint256 = self.token.balanceOf(self)
     return self.getInputPrice(as_unitless_number(eth_sold), as_unitless_number(self.balance), token_reserve)
@@ -423,7 +423,7 @@ def getEthToTokenInputPrice(eth_sold: uint256(wei)) -> uint256:
 # @return Amount of ETH needed to buy output Tokens.
 @public
 @constant
-def getEthToTokenOutputPrice(tokens_bought: uint256) -> uint256(wei):
+def getEthToTokenOutputPrice(tokens_bought: uint256) -> uint256(wei):#换出这么多的token 需要多少ETH
     assert tokens_bought > 0
     token_reserve: uint256 = self.token.balanceOf(self)
     eth_sold: uint256 = self.getOutputPrice(tokens_bought, as_unitless_number(self.balance), token_reserve)
