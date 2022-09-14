@@ -95,6 +95,29 @@ call没有gas限制，最为灵活，是最提倡的方法； _to.call{value: am
 transfer有2300 gas限制，但是发送失败会自动revert交易，是次优选择；  _to.transfer(amount); 无返回值
 send有2300 gas限制，而且发送失败不会自动revert交易，几乎没有人用它。 _to.send(amount);  返回值 bool
 
+---call 返回值理解--------
+对于任意的低级别调用，需要检验调用的返回值，并做出对应的反馈
+如果仅仅是eth转账，改用transfer()而不是send()
+
+后来改为推荐使用transfer来转账
+
+
+低级别调用中产生异常的原因：
+1、代码中主动revert()
+2、gas不足
+3、超过了1024调用栈深度
+
+低级别调用（Low Level Calls）包含：
+1、call()：发出低级别调用，若发生异常则返回false
+2、callcode()：发出低级别调用(类似代码注入)，若发生异常则返回false
+3、delegatecall()：与call的区别在与msg指向不同
+  send()：发送指定数量的wei到这个地址，若发生异常则返回false
+
+低级别调用与普通函数调用（contract call）的区别：
+1、普通调用中抛出异常事，异常会沿着函数调用栈向上传递
+2、低级别调用中抛出异常，仅会返回false
+3、引发问题：对于低级别的调用，如果不对返回值进行检验，将不能获知低级别调用的结果
+
 
 ---------单位相关------------------
 ether   1e18 wei
