@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: SimPL-3.0
 pragma solidity ^0.8.4;
 
-import "ERC721/IERC165.sol";
+import "./IERC165.sol";
 import "hardhat/console.sol";
 contract selectorTest{
 
@@ -35,7 +35,7 @@ contract test1 is IERC165{
        console.logBytes4(result);
     }
 
-     function supportsInterface(bytes4 interfaceId)//0x01ffc9a7 这个是165 的interfaceId
+     function supportsInterface(bytes4 interfaceId)//0x01ffc9a7 这个是165 的interfaceId 接口签名为supportsInterface(bytes4)
         external
         pure
         override

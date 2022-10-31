@@ -24,7 +24,7 @@ contract ABIEncode{
         result = abi.encodeWithSelector(bytes4(keccak256("foo(uint256,address,string,uint256[2])")), x, addr, name, array);
     }
         
-        function encodeWithSelector2() public view returns(bytes4  result) {
+    function encodeWithSelector2() public view returns(bytes4  result) {
         result = bytes4(keccak256("testAdd(uint256,uint256)"));
     }
 
@@ -38,6 +38,10 @@ contract ABIEncode{
         a=bytes4(keccak256(_func));//这里的入参是bytes
         result=abi.encodeWithSelector(a,_num1,_num2);
        result2 = abi.encodeWithSignature(_func2);
+    }
+
+    function encodeWithSelector3() public  returns(bytes4  result) {
+        result = bytes4(keccak256("sum(uint256,uint256) uint"));
     }
    
 }
