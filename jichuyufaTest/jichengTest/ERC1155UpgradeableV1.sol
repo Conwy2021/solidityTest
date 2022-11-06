@@ -5,7 +5,7 @@ import "github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/c
 import "github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 
-coERC1155UpgradeableV1ntract  is 
+contract ERC1155UpgradeableV1 is 
     Initializable, 
     OwnableUpgradeable, 
     ERC1155Upgradeable, 
