@@ -3,7 +3,7 @@ import "github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/c
 import "github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/access/OwnableUpgradeable.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/proxy/utils/Initializable.sol";
 import "github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/master/contracts/proxy/utils/UUPSUpgradeable.sol";
-
+import "hardhat/console.sol";
 
 contract ERC1155UpgradeableV1 is 
     Initializable, 
@@ -16,6 +16,7 @@ contract ERC1155UpgradeableV1 is
         __ERC1155_init("");
         __Ownable_init();
         __UUPSUpgradeable_init();
+          console.log("v1");
     }
 
     function setURI(string memory newuri) public {
