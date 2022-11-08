@@ -365,3 +365,7 @@ interfaceId  查询接口是否实现要求的接口
 POS  以实际项目 理解 https://github.com/shockcoder/PoS-demo  参考文章https://zhuanlan.zhihu.com/p/31588809
 自我理解：也是计算一个hash 小于目标值 即可以记账（出块） 我们简单计为 hash<代币量*目标值   
 目标值不变 代币量越多 算出满足要求的hash值 就越大  例如 计算一个1到10的数的概率  小于 计算一个1到20的数的概率
+
+--工具使用 相关---
+python3  hex 转显示为string
+ bytes.fromhex('74657374207631')   返回 b'test v1'   类型是byte
