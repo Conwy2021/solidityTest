@@ -370,3 +370,13 @@ POS  以实际项目 理解 https://github.com/shockcoder/PoS-demo  参考文章
 --工具使用 相关---
 python3  hex 转显示为string
  bytes.fromhex('74657374207631')   返回 b'test v1'   类型是byte
+
+ --测试框架hardhat 相关--
+ 1、安装nodejs
+ 2、执行 npm install hardhat  安装hardhat模块
+ 3、npx hardhat test .\test\signUtil.spec.ts  执行测试ts文件 
+
+ npx hardhat compile					//编译默认的hardhat.config.ts配置下的合约文档
+ npx hardhat 查看 整体命令
+ npx hardhat --version 查看版本s
+ npx hardhat test 执行所有测试脚本
