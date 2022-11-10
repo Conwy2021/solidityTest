@@ -384,5 +384,17 @@ python3  hex 转显示为string
  执行ts 文件 步骤
  局部安装 npm install typescript  npm install  ts-node
  执行 npx ts-node foo.ts  
+ 在hardhat 中  npx hardhat run .\scripts\deploy.ts  执行  
+ npx hardhat test  执行的是测试文件 会打印返回与预想是否一致 写法也不同
  局部安装的模块 使用npx 进行操作  
  全局安装会按到C盘下 不让执行脚本 
+
+ --npm install 说明--
+ npm install moduleName # 安装模块到项目目录下
+ 
+npm install -g moduleName # -g 的意思是将模块安装到全局，具体安装到磁盘哪个位置，要看 npm config prefix 的位置。
+ 
+npm install -save moduleName # -save 的意思是将模块安装到项目目录下，并在package文件的dependencies节点写入依赖。
+ 
+npm install -save-dev moduleName # -save-dev 的意思是将模块安装到项目目录下，并在package文件的devDependencies节点写入依赖。
+详细说明：https://segmentfault.com/a/1190000021468231

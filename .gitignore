@@ -3,3 +3,4 @@
 **/artifacts
 .vscode
 .deps
+/hardhatTest/node_modules
