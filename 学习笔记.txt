@@ -380,3 +380,9 @@ python3  hex 转显示为string
  npx hardhat 查看 整体命令
  npx hardhat --version 查看版本s
  npx hardhat test 执行所有测试脚本
+
+ 执行ts 文件 步骤
+ 局部安装 npm install typescript  npm install  ts-node
+ 执行 npx ts-node foo.ts  
+ 局部安装的模块 使用npx 进行操作  
+ 全局安装会按到C盘下 不让执行脚本 
