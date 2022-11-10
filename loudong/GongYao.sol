@@ -29,10 +29,10 @@ contract GongYao{
     bytes32  r = bytesToBytes32(slice(signedString, 0, 32));
     bytes32  s = bytesToBytes32(slice(signedString, 32, 32));
     byte  v = slice(signedString, 64, 1)[0];
-    console.logBytes32(r);//0xf4128988cbe7df8315440adde412a8955f7f5ff9a5468a791433727f82717a67
-    console.logBytes32(s);//0x53bd71882079522207060b681fbd3f5623ee7ed66e33fc8e581f442acbcf6ab8
-    console.logBytes32(v);//0x0000000000000000000000000000000000000000000000000000000000000000
-    console.logBytes1(v);//打印类型不同 0x00
+    // console.logBytes32(r);//0xf4128988cbe7df8315440adde412a8955f7f5ff9a5468a791433727f82717a67
+    // console.logBytes32(s);//0x53bd71882079522207060b681fbd3f5623ee7ed66e33fc8e581f442acbcf6ab8
+    // console.logBytes32(v);//0x0000000000000000000000000000000000000000000000000000000000000000
+    // console.logBytes1(v);//打印类型不同 0x00
     return ecrecoverDecode(r, s, v);
   }
 
@@ -59,7 +59,41 @@ contract GongYao{
     assembly {
         result := mload(add(source, 32))
     }
+
+    
   }
+  function decodeFast(bytes signed,bytes32 hash) public returns (address addr){//  存在问题 只适用本代码的验签
 
+      bytes32  r = bytesToBytes32(slice(signed, 0, 32));
+      bytes32  s = bytesToBytes32(slice(signed, 32, 32));
+      byte  v = slice(signed, 64, 1)[0];
+      uint8 v1 = uint8(v) + 27;
 
+      addr = ecrecover(hash, v1, r, s);
+    }
+
+    function recoverSigner(bytes32 _msgHash, bytes memory _signature) public pure returns (address){
+        // 检查签名长度，65是标准r,s,v签名的长度
+        require(_signature.length == 65, "invalid signature length");
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+        // 目前只能用assembly (内联汇编)来从签名中获得r,s,v的值
+        assembly {
+            /*
+            前32 bytes存储签名的长度 (动态数组存储规则)
+            add(sig, 32) = sig的指针 + 32
+            等效为略过signature的前32 bytes
+            mload(p) 载入从内存地址p起始的接下来32 bytes数据
+            */
+            // 读取长度数据后的32 bytes
+            r := mload(add(_signature, 0x20))
+            // 读取之后的32 bytes
+            s := mload(add(_signature, 0x40))
+            // 读取最后一个byte
+            v := byte(0, mload(add(_signature, 0x60)))
+        }
+        // 使用ecrecover(全局函数)：利用 msgHash 和 r,s,v 恢复 signer 地址
+        return ecrecover(_msgHash, v, r, s);
+    }
 }
