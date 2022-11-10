@@ -17,11 +17,5 @@ contract testUpgradeableV1 is
         __UUPSUpgradeable_init();
         console.log("test v1");
     }
-
-   
-
-    
-    
-
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 }
