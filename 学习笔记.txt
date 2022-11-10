@@ -130,7 +130,8 @@ wei     1
 这个合约 可以存在相同代码 但是地址不同 的情况
 所以有 OtherContract(_Address).setX(x);  指定地址的合约进行调用
 
-加{value:msg.value} 会把交易中以太币传给下一个合约 不加 就给自己
+OtherContract(_Address).setX(x){value:msg.value}  调用另一个合约的函数并传递平台币 
+OtherContract(_Address).setX(x){gas: 1000000, value: 1 ether} 还可以设置gas限制 
 
 call是solidity官方推荐的通过触发fallback或receive函数发送ETH的方法。
 不推荐用call来调用另一个合约，因为当你调用不安全合约的函数时，你就把主动权交给了它。推荐的方法仍是声明合约变量后调用函数，见第21讲：调用其他合约
