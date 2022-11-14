@@ -4,3 +4,4 @@
 .vscode
 .deps
 /hardhatTest/node_modules
+/hardhatTest/secrets.json

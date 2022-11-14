@@ -35,6 +35,41 @@
       "artifacts": [
         "Lock"
       ]
+    },
+    "D:\\work\\projectTest\\solidityTest\\hardhatTest\\contracts\\test3.sol": {
+      "lastModificationDate": 1668130203707,
+      "contentHash": "94a8f0ae0d0a67b324399613cb803cc2",
+      "sourceName": "contracts/test3.sol",
+      "solcConfig": {
+        "version": "0.8.17",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "test3"
+      ]
     }
   }
 }

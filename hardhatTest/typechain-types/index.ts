@@ -2,5 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { Lock } from "./Lock";
+export type { Test3 } from "./Test3";
 export * as factories from "./factories";
 export { Lock__factory } from "./factories/Lock__factory";
+export { Test3__factory } from "./factories/Test3__factory";
