@@ -370,6 +370,11 @@ POS  以实际项目 理解 https://github.com/shockcoder/PoS-demo  参考文章
 --工具使用 相关---
 python3  hex 转显示为string
  bytes.fromhex('74657374207631')   返回 b'test v1'   类型是byte
+10进制转16进制
+hex(115792089237316195423570985008687907853269984665640564039457584007913129639935)
+16进制转10进制
+直接输入 0xff 回车
+
 
  --测试框架hardhat 相关--
  1、安装nodejs
