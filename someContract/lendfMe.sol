@@ -933,16 +933,16 @@ contract MoneyMarket is Exponential, SafeToken {
         // Scale the interest rate times number of blocks
         // Note: Doing Exp construction inline to avoid `CompilerError: Stack too deep, try removing local variables.`
         (Error err1, Exp memory blocksTimesRate) = mulScalar(Exp({mantissa: interestRateMantissa}), blockDelta);
-        if (err1 != Error.NO_ERROR) {//conwy  计算
+        if (err1 != Error.NO_ERROR) {//conwy  将利率乘以区块数
             return (err1, 0);
         }
 
         // Add one to that result (which is really Exp({mantissa: expScale}) which equals 1.0)
         (Error err2, Exp memory onePlusBlocksTimesRate) = addExp(blocksTimesRate, Exp({mantissa: mantissaOne}));
-        if (err2 != Error.NO_ERROR) {
+        if (err2 != Error.NO_ERROR) {//当前分率 增加10**18
             return (err2, 0);
         }
-
+        //然后将累积的利息乘以旧的利息指数得到新的利息指数
         // Then scale that accumulated interest by the old interest index to get the new interest index
         (Error err3, Exp memory newInterestIndexExp) = mulScalar(onePlusBlocksTimesRate, startingInterestIndex);
         if (err3 != Error.NO_ERROR) {
@@ -952,8 +952,8 @@ contract MoneyMarket is Exponential, SafeToken {
         // Finally, truncate the interest index. This works only if interest index starts large enough
         // that is can be accurately represented with a whole number.
         return (Error.NO_ERROR, truncate(newInterestIndexExp));
-    }
-
+    }//最后，截断兴趣指数。只有当利率指数开始时足够大时，这种方法才有效
+    //可以精确地用整数表示。
     /**
       * @dev Calculates a new balance based on a previous balance and a pair of interest indices
       *      This is defined as: `The user's last balance checkpoint is multiplied by the currentSupplyIndex
@@ -1510,7 +1510,7 @@ contract MoneyMarket is Exponential, SafeToken {
             return fail(Error.CONTRACT_PAUSED, FailureInfo.SUPPLY_CONTRACT_PAUSED);
         }
 
-        Market storage market = markets[asset];
+        Market storage market = markets[asset];//asset 代币地址
         Balance storage balance = supplyBalances[msg.sender][asset];
 
         SupplyLocalVars memory localResults; // Holds all our uint calculation results
@@ -1541,7 +1541,7 @@ contract MoneyMarket is Exponential, SafeToken {
 
         (err, localResults.userSupplyUpdated) = add(localResults.userSupplyCurrent, amount);
         if (err != Error.NO_ERROR) {
-            return fail(err, FailureInfo.SUPPLY_NEW_TOTAL_BALANCE_CALCULATION_FAILED);
+            return fail(err, FailureInfo.SUPPLY_NEW_TO TAL_BALANCE_CALCULATION_FAILED);
         }
 
         // We calculate the protocol's totalSupply by subtracting the user's prior checkpointed balance, adding user's updated supply
