@@ -1505,7 +1505,7 @@ contract MoneyMarket is Exponential, SafeToken {
       * @param amount The amount to supply
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
-    function supply(address asset, uint amount) public returns (uint) {
+    function supply(address asset, uint amount) public returns (uint) {//conwy 供应
         if (paused) {
             return fail(Error.CONTRACT_PAUSED, FailureInfo.SUPPLY_CONTRACT_PAUSED);
         }
@@ -1631,7 +1631,7 @@ contract MoneyMarket is Exponential, SafeToken {
       * @param requestedAmount The amount to withdraw (or -1 for max)
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
-    function withdraw(address asset, uint requestedAmount) public returns (uint) {
+    function withdraw(address asset, uint requestedAmount) public returns (uint) {//conwy 提款
         if (paused) {
             return fail(Error.CONTRACT_PAUSED, FailureInfo.WITHDRAW_CONTRACT_PAUSED);
         }
@@ -1946,7 +1946,7 @@ contract MoneyMarket is Exponential, SafeToken {
       * @param amount The amount to repay (or -1 for max)
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
-    function repayBorrow(address asset, uint amount) public returns (uint) {
+    function repayBorrow(address asset, uint amount) public returns (uint) {//conwy 偿还借款
         if (paused) {
             return fail(Error.CONTRACT_PAUSED, FailureInfo.REPAY_BORROW_CONTRACT_PAUSED);
         }
@@ -2140,7 +2140,7 @@ contract MoneyMarket is Exponential, SafeToken {
       * @param requestedAmountClose The amount to repay (or -1 for max)
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
-    function liquidateBorrow(address targetAccount, address assetBorrow, address assetCollateral, uint requestedAmountClose) public returns (uint) {
+    function liquidateBorrow(address targetAccount, address assetBorrow, address assetCollateral, uint requestedAmountClose) public returns (uint) {//conwy 清算借款
         if (paused) {
             return fail(Error.CONTRACT_PAUSED, FailureInfo.LIQUIDATE_CONTRACT_PAUSED);
         }
@@ -2549,7 +2549,7 @@ contract MoneyMarket is Exponential, SafeToken {
       * @param amount The amount to borrow
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
-    function borrow(address asset, uint amount) public returns (uint) {
+    function borrow(address asset, uint amount) public returns (uint) {// conwy 借款
         if (paused) {
             return fail(Error.CONTRACT_PAUSED, FailureInfo.BORROW_CONTRACT_PAUSED);
         }
