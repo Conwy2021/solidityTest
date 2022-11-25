@@ -370,6 +370,11 @@ POS  以实际项目 理解 https://github.com/shockcoder/PoS-demo  参考文章
 --工具使用 相关---
 python3  hex 转显示为string
  bytes.fromhex('74657374207631')   返回 b'test v1'   类型是byte
+10进制转16进制
+hex(115792089237316195423570985008687907853269984665640564039457584007913129639935)
+16进制转10进制
+直接输入 0xff 回车
+
 
  --测试框架hardhat 相关--
  1、安装nodejs
@@ -398,3 +403,22 @@ npm install -save moduleName # -save 的意思是将模块安装到项目目录�
  
 npm install -save-dev moduleName # -save-dev 的意思是将模块安装到项目目录下，并在package文件的devDependencies节点写入依赖。
 详细说明：https://segmentfault.com/a/1190000021468231
+
+
+--钱包签名 相关--
+一般签名
+https://github.com/AmazingAng/WTF-Solidity/tree/main/37_Signature
+此处使用api 还有种用法 eth_sign 
+712签名使用 
+https://stackoverflow.com/questions/67947640/calculate-message-hash-for-eth-signtypeddata
+
+--公链学习 相关--
+txpool 
+TxPool用來存放準備被寫入區塊的交易，包含 remote與 local
+交易又分兩種
+pending: 經過驗證（gas limit、nonce…等）後確定是可被執行的交易。
+queued: 已被提交但還不能夠被執行，例如 nonce跳號。
+
+--订阅模式 操作 相关--
+./wscat -c 192.168.116.128:8546   安装wscat 找到安装目录使用
+具体使用方法http://cw.hubwiz.com/card/c/infura-api/1/3/8/
