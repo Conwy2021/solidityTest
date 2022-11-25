@@ -26,5 +26,7 @@ contract test3{
         return num;
     }
 
+    uint256 public constant ONE_ETHER = 1_000_000_000_000_000_000;
+    
 
 }
