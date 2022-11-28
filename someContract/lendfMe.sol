@@ -979,7 +979,7 @@ contract MoneyMarket is Exponential, SafeToken {
       * @dev Gets the price for the amount specified of the given asset.
       */
     function getPriceForAssetAmount(address asset, uint assetAmount) internal view returns (Error, Exp memory)  {
-        (Error err, Exp memory assetPrice) = fetchAssetPrice(asset);
+        (Error err, Exp memory assetPrice) = fetchAssetPrice(asset);//获取价格 
         if (err != Error.NO_ERROR) {
             return (err, Exp({mantissa: 0}));
         }
@@ -1781,11 +1781,11 @@ contract MoneyMarket is Exponential, SafeToken {
       *      storage, it simply calculates the account liquidity and shortfall with liquidity being
       *      returned as the first Exp, ie (Error, accountLiquidity, accountShortfall).
       */
-    function calculateAccountLiquidity(address userAddress) internal view returns (Error, Exp memory, Exp memory) {
+    function calculateAccountLiquidity(address userAddress) internal view returns (Error, Exp memory, Exp memory) {//conwy 计算用户偿还能力
         Error err;
         uint sumSupplyValuesMantissa;
         uint sumBorrowValuesMantissa;
-        (err, sumSupplyValuesMantissa, sumBorrowValuesMantissa) = calculateAccountValuesInternal(userAddress);
+        (err, sumSupplyValuesMantissa, sumBorrowValuesMantissa) = calculateAccountValuesInternal(userAddress);//总的提供的钱 和借贷的钱
         if (err != Error.NO_ERROR) {
             return(err, Exp({mantissa: 0}), Exp({mantissa: 0}));
         }
@@ -2595,7 +2595,7 @@ contract MoneyMarket is Exponential, SafeToken {
         }
 
         // Check customer liquidity
-        (err, localResults.accountLiquidity, localResults.accountShortfall) = calculateAccountLiquidity(msg.sender);
+        (err, localResults.accountLiquidity, localResults.accountShortfall) = calculateAccountLiquidity(msg.sender);//计算用户偿还能力
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.BORROW_ACCOUNT_LIQUIDITY_CALCULATION_FAILED);
         }
