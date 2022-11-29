@@ -441,5 +441,5 @@ function onERC1155Received(address operator, address from ,uint256 id , uint256 
             gacha.claim(9527);
             return this.onERC1155Received.selector;
         }
-        return this.onERC1155Received.selector;
+        return this.onERC1155Received.selector;//0xf23a6e61
     }
