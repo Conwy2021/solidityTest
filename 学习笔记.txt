@@ -157,6 +157,14 @@ CREATE2 新地址 = hash("0xFF",创建者地址, salt, bytecode)
 
 可以向预地址打钱 通过create2.sol 验证成功    这边重点说明下 地址 是都存在的 只要满足20btyes要求  只是说这个地址上有没有账号或者合约
 所以说 不能说不存在的地址 
+汇编写法
+assembly {
+            pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
+        }
+selfdestruct(payable(msg.sender)); 自毁用法
+
+同一地址不可部署两个合约，当第一个合约自毁后，可以部署上第二个合约。
+待分析链代码
 ----------------------- 
 import "hardhat/console.sol"; 导入这个函数 就可以使用console.log 
 
