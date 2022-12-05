@@ -862,14 +862,14 @@ contract EarnERC777 is IERC777, IERC20 {
         require(holder != address(0), "ERC777: transfer from the zero address");
 
         address spender = msg.sender;
-
+        //通知 holder 
         _callTokensToSend(spender, holder, recipient, amount, "", "");//conwy spenders是借贷合约 holder是攻击合约 recipient是借贷合约
 
         _move(spender, holder, recipient, amount, "", "");
 
         _approve(holder, spender, _allowances[holder][spender].sub(amount));
-
-        _callTokensReceived(spender, holder, recipient, amount, "", "", false);
+        //通知  recipient
+        _callTokensReceived(spender, holder, recipient, amount, "", "", false);//最后一个参数 是判断recipient 是否是合约账号
 
         return true;
     }

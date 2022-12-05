@@ -694,7 +694,7 @@ contract MoneyMarket is Exponential, SafeToken {
       *      }
       */
     struct Balance {
-        uint principal;
+        uint principal;//本金
         uint interestIndex;
     }
 
@@ -923,9 +923,9 @@ contract MoneyMarket is Exponential, SafeToken {
       *      This is defined as `we multiply the most recent supply index by (1 + blocks times rate)`
       */
     function calculateInterestIndex(uint startingInterestIndex, uint interestRateMantissa, uint blockStart, uint blockEnd) pure internal returns (Error, uint) {
-
+                                    //第一次进来 startingInterestIndex 10**18 interestRateMantissa 0  blockStart 0 blockEnd 当前区块
         // Get the block delta
-        (Error err0, uint blockDelta) = sub(blockEnd, blockStart);
+        (Error err0, uint blockDelta) = sub(blockEnd, blockStart)
         if (err0 != Error.NO_ERROR) {
             return (err0, 0);
         }
@@ -933,25 +933,25 @@ contract MoneyMarket is Exponential, SafeToken {
         // Scale the interest rate times number of blocks
         // Note: Doing Exp construction inline to avoid `CompilerError: Stack too deep, try removing local variables.`
         (Error err1, Exp memory blocksTimesRate) = mulScalar(Exp({mantissa: interestRateMantissa}), blockDelta);
-        if (err1 != Error.NO_ERROR) {//conwy  将利率乘以区块数
+        if (err1 != Error.NO_ERROR) {//conwy  将利率乘以区块数  第一次进来 blocksTimesRate 0
             return (err1, 0);
         }
 
         // Add one to that result (which is really Exp({mantissa: expScale}) which equals 1.0)
-        (Error err2, Exp memory onePlusBlocksTimesRate) = addExp(blocksTimesRate, Exp({mantissa: mantissaOne}));
-        if (err2 != Error.NO_ERROR) {//当前分率 增加10**18
+        (Error err2, Exp memory onePlusBlocksTimesRate) = addExp(blocksTimesRate, Exp({mantissa: mantissaOne}));//mantissaOne 10**18
+        if (err2 != Error.NO_ERROR) {//当前尾数 增加10**18
             return (err2, 0);
         }
         //然后将累积的利息乘以旧的利息指数得到新的利息指数
         // Then scale that accumulated interest by the old interest index to get the new interest index
         (Error err3, Exp memory newInterestIndexExp) = mulScalar(onePlusBlocksTimesRate, startingInterestIndex);
-        if (err3 != Error.NO_ERROR) {
+        if (err3 != Error.NO_ERROR) {//第一次 进来newInterestIndexExp为10**36？ 
             return (err3, 0);
         }
 
         // Finally, truncate the interest index. This works only if interest index starts large enough
         // that is can be accurately represented with a whole number.
-        return (Error.NO_ERROR, truncate(newInterestIndexExp));
+        return (Error.NO_ERROR, truncate(newInterestIndexExp));//除以10**18
     }//最后，截断兴趣指数。只有当利率指数开始时足够大时，这种方法才有效
     //可以精确地用整数表示。
     /**
@@ -1270,13 +1270,13 @@ contract MoneyMarket is Exponential, SafeToken {
       * @param interestRateModel InterestRateModel to use for the asset
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
-    function _supportMarket(address asset, InterestRateModel interestRateModel) public returns (uint) {
+    function _supportMarket(address asset, InterestRateModel interestRateModel) public returns (uint) {//设置支持的市场，默认supplyIndex borrowIndex 10**18
         // Check caller = admin
         if (msg.sender != admin) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SUPPORT_MARKET_OWNER_CHECK);
         }
 
-        (Error err, Exp memory assetPrice) = fetchAssetPrice(asset);
+        (Error err, Exp memory assetPrice) = fetchAssetPrice(asset);//通过预言机 获取 此代币的价格
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.SUPPORT_MARKET_FETCH_PRICE_FAILED);
         }
@@ -1296,11 +1296,11 @@ contract MoneyMarket is Exponential, SafeToken {
 
         // Default supply and borrow index to 1e18
         if (markets[asset].supplyIndex == 0) {
-            markets[asset].supplyIndex = initialInterestIndex;
+            markets[asset].supplyIndex = initialInterestIndex;//10**18
         }
 
         if (markets[asset].borrowIndex == 0) {
-            markets[asset].borrowIndex = initialInterestIndex;
+            markets[asset].borrowIndex = initialInterestIndex;//10**18
         }
 
         emit SupportedMarket(asset, interestRateModel);
@@ -1510,7 +1510,7 @@ contract MoneyMarket is Exponential, SafeToken {
             return fail(Error.CONTRACT_PAUSED, FailureInfo.SUPPLY_CONTRACT_PAUSED);
         }
 
-        Market storage market = markets[asset];//asset 代币地址
+        Market storage market = markets[asset];//asset 代币地址 _supportMarket函数初始化 markert 参数
         Balance storage balance = supplyBalances[msg.sender][asset];
 
         SupplyLocalVars memory localResults; // Holds all our uint calculation results
@@ -1523,38 +1523,38 @@ contract MoneyMarket is Exponential, SafeToken {
         }
 
         // Fail gracefully if asset is not approved or has insufficient balance
-        err = checkTransferIn(asset, msg.sender, amount);
+        err = checkTransferIn(asset, msg.sender, amount);//检查授权给此合约的钱 和 msg.sender 是否有这么多钱
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.SUPPLY_TRANSFER_IN_NOT_POSSIBLE);
         }
 
-        // We calculate the newSupplyIndex, user's supplyCurrent and supplyUpdated for the asset
+        // We calculate the newSupplyIndex, user's supplyCurrent and supplyUpdated for the asset // market.supplyIndex 初始值10**18
         (err, localResults.newSupplyIndex) = calculateInterestIndex(market.supplyIndex, market.supplyRateMantissa, market.blockNumber, getBlockNumber());
-        if (err != Error.NO_ERROR) {
+        if (err != Error.NO_ERROR) {//第一次进来 newSupplyIndex为10**18
             return fail(err, FailureInfo.SUPPLY_NEW_SUPPLY_INDEX_CALCULATION_FAILED);
         }
-
+                                                                //第一次 进来 balance就是个默认值吧 principal 为0 interestIndex 为0 newSupplyIndex 为10*18
         (err, localResults.userSupplyCurrent) = calculateBalance(balance.principal, balance.interestIndex, localResults.newSupplyIndex);
-        if (err != Error.NO_ERROR) {
+        if (err != Error.NO_ERROR) {//第一次进来 userSupplyCurrent 为0
             return fail(err, FailureInfo.SUPPLY_ACCUMULATED_BALANCE_CALCULATION_FAILED);
         }
 
-        (err, localResults.userSupplyUpdated) = add(localResults.userSupplyCurrent, amount);
-        if (err != Error.NO_ERROR) {
+        (err, localResults.userSupplyUpdated) = add(localResults.userSupplyCurrent, amount);//userSupplyUpdated=0+amount 假设amount 为1000
+        if (err != Error.NO_ERROR) {// 第一次进来 userSupplyUpdated 为1000 
             return fail(err, FailureInfo.SUPPLY_NEW_TO TAL_BALANCE_CALCULATION_FAILED);
         }
 
         // We calculate the protocol's totalSupply by subtracting the user's prior checkpointed balance, adding user's updated supply
-        (err, localResults.newTotalSupply) = addThenSub(market.totalSupply, localResults.userSupplyUpdated, balance.principal);
-        if (err != Error.NO_ERROR) {
+        (err, localResults.newTotalSupply) = addThenSub(market.totalSupply, localResults.userSupplyUpdated, balance.principal);//a+b-c
+        if (err != Error.NO_ERROR) {// 第一次 totalSupply 为0  newTotalSupply 为1000 
             return fail(err, FailureInfo.SUPPLY_NEW_TOTAL_SUPPLY_CALCULATION_FAILED);
         }
 
         // We need to calculate what the updated cash will be after we transfer in from user
-        localResults.currentCash = getCash(asset);
+        localResults.currentCash = getCash(asset);//当前合约 有多少此代币 第一次进入 currentCash 为 0
 
         (err, localResults.updatedCash) = add(localResults.currentCash, amount);
-        if (err != Error.NO_ERROR) {
+        if (err != Error.NO_ERROR) {//第一次 updatedCash 为0
             return fail(err, FailureInfo.SUPPLY_NEW_TOTAL_CASH_CALCULATION_FAILED);
         }
 
