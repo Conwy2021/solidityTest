@@ -30,12 +30,15 @@ contract PairFactory2 {
         function createPair2(address tokenA, address tokenB) external returns (address pair) {
            
             (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA); //将tokenA和tokenB按大小排序
-            bytes32 salt = keccak256(abi.encodePacked(tokenA, tokenA));
+            bytes32 salt = keccak256(abi.encodePacked(token0, token1));
             // 用create2部署新合约
             bytes memory bytecode = type(Pair).creationCode;
+            console.log("createPair2 bytecode");
+            console.logBytes(bytecode);
             assembly {
             pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
             }
+            console.log("createPair2 pair address");
             console.log(pair);
             Pair(pair).initialize(token0, token1);
            
@@ -54,5 +57,11 @@ contract PairFactory2 {
                 salt,//盐值
                 keccak256(type(Pair).creationCode)//合约的代码
             )))));
+            console.log("calculateAddr Address");
+            console.log(predictedAddress);
+            console.log("calculateAddr pair type");
+            console.logBytes32(keccak256(type(Pair).creationCode));
+            console.log("calculateAddr 0xff");
+            console.log(uint8(bytes1(0xff)));
         }
 }
