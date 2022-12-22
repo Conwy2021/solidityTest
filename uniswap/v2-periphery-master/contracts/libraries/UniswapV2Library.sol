@@ -21,7 +21,7 @@ library UniswapV2Library {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // init code hash
+                hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // init code hash 这个是 keccak256(type(Pair).creationCode) 返回的
             ))));
     }
 
@@ -72,11 +72,11 @@ library UniswapV2Library {
     // performs chained getAmountIn calculations on any number of pairs
     function getAmountsIn(address factory, uint amountOut, address[] memory path) internal view returns (uint[] memory amounts) {
         require(path.length >= 2, 'UniswapV2Library: INVALID_PATH');
-        amounts = new uint[](path.length);
-        amounts[amounts.length - 1] = amountOut;
+        amounts = new uint[](path.length);//[aest,usdt]
+        amounts[amounts.length - 1] = amountOut;//50000000000000000000 amounts[0,50000000000000000000]
         for (uint i = path.length - 1; i > 0; i--) {
-            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i - 1], path[i]);
-            amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);
+            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i - 1], path[i]);// reserveIn 是 aset reserveOut 是 usdt
+            amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut);//amounts[0]=5015045135406218655967904 amounts[5015045135406218655967904,50000000000000000000]
         }
     }
 }

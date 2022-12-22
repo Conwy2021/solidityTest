@@ -165,6 +165,14 @@ selfdestruct(payable(msg.sender)); 自毁用法
 
 同一地址不可部署两个合约，当第一个合约自毁后，可以部署上第二个合约。
 待分析链代码
+
+create2(v, p, n, s)
+使用内存 p 到 p + n 的代码创建新合约
+并发送 v wei
+并返回新地址
+where new address = 前 20 bytes of keccak256(0xff + address(this) + s + keccak256(mem[p…(p+n)))
+s = big-endian 256-bit value
+       
 ----------------------- 
 import "hardhat/console.sol"; 导入这个函数 就可以使用console.log 
 

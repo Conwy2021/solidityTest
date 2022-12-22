@@ -266,7 +266,7 @@ contract UniswapV2Router01 is IUniswapV2Router01 {
         return UniswapV2Library.getAmountOut(amountIn, reserveIn, reserveOut);
     }
 
-    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) public pure override returns (uint amountIn) {
+    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) public pure override returns (uint amountIn) {//官方说有bug https://docs.uniswap.org/contracts/v2/reference/smart-contracts/router-01
         return UniswapV2Library.getAmountOut(amountOut, reserveIn, reserveOut);
     }
 

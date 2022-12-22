@@ -1673,7 +1673,7 @@ contract MoneyMarket is Exponential, SafeToken {
 
         // From here on we should NOT use requestedAmount.
 
-        // Fail gracefully if protocol has insufficient cash
+        // Fail gracefully if protocol has insufficient cash 如果protocol没有足够的资金，就优雅地失败
         // If protocol has insufficient cash, the sub operation will underflow.
         localResults.currentCash = getCash(asset);
         (err, localResults.updatedCash) = sub(localResults.currentCash, localResults.withdrawAmount);

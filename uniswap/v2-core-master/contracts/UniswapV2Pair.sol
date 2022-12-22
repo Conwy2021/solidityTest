@@ -155,9 +155,9 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
         emit Burn(msg.sender, amount0, amount1, to);
     }
 
-    // this low-level function should be called from a contract which performs important safety checks
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock {
-        require(amount0Out > 0 || amount1Out > 0, 'UniswapV2: INSUFFICIENT_OUTPUT_AMOUNT');
+    // this low-level function should be called from a contract which performs important safety checks amounts[5015045135406218655967904,50000000000000000000]
+    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock {// uint amount0Out 0 , uint amount1Out 是 50000000000000000000
+        require(amount0Out > 0 || amount1Out > 0, 'UniswapV2: INSUFFICIENT_OUTPUT_AMOUNT');//应该转aset 5015045135406218655967904 实际 减去10% 4513540621865597000000000
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         require(amount0Out < _reserve0 && amount1Out < _reserve1, 'UniswapV2: INSUFFICIENT_LIQUIDITY');
 
@@ -169,10 +169,10 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
         require(to != _token0 && to != _token1, 'UniswapV2: INVALID_TO');
         if (amount0Out > 0) _safeTransfer(_token0, to, amount0Out); // optimistically transfer tokenst todo 这里不执行 amount0Out为0
         if (amount1Out > 0) _safeTransfer(_token1, to, amount1Out); // optimistically transfer tokens todo 要兑换出的币 97
-        if (data.length > 0) IUniswapV2Callee(to).uniswapV2Call(msg.sender, amount0Out, amount1Out, data);
-        balance0 = IERC20(_token0).balanceOf(address(this));//todo  这里在router合约已经转代币过来了4100
-        balance1 = IERC20(_token1).balanceOf(address(this));//兑换后剩余的代币数量 todo 3902.73
-        }//_reserve0  _reserve1 为4000 
+        if (data.length > 0) IUniswapV2Callee(to).uniswapV2Call(msg.sender, amount0Out, amount1Out, data);//闪电贷 的入口 一般接收函数会以匿名函数接收调用
+        balance0 = IERC20(_token0).balanceOf(address(this));//todo  这里在router合约已经转代币过来了4100 4513540621865597000000000+5000000000000000000000000 =9513540621865597000000000
+        balance1 = IERC20(_token1).balanceOf(address(this));//兑换后剩余的代币数量 todo 3902.73  balance1 50000000000000000000
+        }//_reserve0  _reserve1 为4000          amount0In 为 4513540621865597000000000 amount1In 0
         uint amount0In = balance0 > _reserve0 - amount0Out ? balance0 - (_reserve0 - amount0Out) : 0;//todo balance0 -_reserve0 amount0Out为0
         uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;//todo 是0  balance1 == _reserve1 - amount1Out
         require(amount0In > 0 || amount1In > 0, 'UniswapV2: INSUFFICIENT_INPUT_AMOUNT');
@@ -189,7 +189,18 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
         emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
     }
 
+    // _reserve0 5000000000000000000000000 amount0Out 0     转账 transfer 收取手续费的数据 10%的手续费
+    // balance0 9513540621865597000000000
+    // amount0In 4513540621865597000000000
+    // balance1 50000000000000000000
+    // _reserve1 100000000000000000000
+    // amount1Out 50000000000000000000 amount1In 0
+    // balance0Adjusted 9513540621865597000000000*1000-4513540621865597000000000*3 9500000000000000209000000000
+    // balance1Adjusted 50000000000000000000*1000-0*3								50000000000000000000000
     // force balances to match reserves
+    // (9513540621865597000000000*1000-4513540621865597000000000*3)*50000000000000000000*1000 > 100000000000000000000*5000000000000000000000000*1000000
+                                        // 475000000000000010450000000000000000000000000000000                                                
+                                        // 500000000000000000000000000000000000000000000000000
     function skim(address to) external lock {
         address _token0 = token0; // gas savings
         address _token1 = token1; // gas savings
