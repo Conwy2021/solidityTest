@@ -158,7 +158,7 @@ library MathLib {
     function calculateLiquidityTokenQtyForSingleAssetEntryWithBaseTokenDecay(
         uint256 _baseTokenReserveBalance,
         uint256 _totalSupplyOfLiquidityTokens,  // 流动性代币总量
-        uint256 _tokenQtyAToAdd, // quoteToken
+        uint256 _tokenQtyAToAdd, // quoteToken 正常新增的basetoken 应该对应多少quoteToken
         uint256 _internalTokenAReserveQty,// _internalBalances.quoteTokenReserveQty
         uint256 _omega // _internalBalances 里的 base / quote
     ) public pure returns (uint256 liquidityTokenQty) {
@@ -171,7 +171,7 @@ library MathLib {
 
 
          */
-        uint256 wRatio = wDiv(_baseTokenReserveBalance, _omega);
+        uint256 wRatio = wDiv(_baseTokenReserveBalance, _omega);//按原比例情况 quoteToken应该是多少
         uint256 denominator = wRatio + _internalTokenAReserveQty;
         uint256 wGamma = wDiv(_tokenQtyAToAdd, denominator);
 
