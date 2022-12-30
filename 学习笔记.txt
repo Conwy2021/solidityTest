@@ -479,3 +479,8 @@ bytes32 constant internal TOKENS_SENDER_INTERFACE_HASH =
  0xb281fc8c12954d22544db45de3159a39272895b169a852b314f9cc762e44c53b;
 
 getManager(address _addr) 判断如果是初始值（0地址）则返回输入的地址 也就限制了只有自己的合约可以设置自己的合约接口的哈希实现的地址
+
+--remix 扩展插件使用相关--
+加载本地文件至浏览器  安装说明https://blog.csdn.net/qq_33842966/article/details/121888985
+cmd 中 执行
+remixd -s D:\work\Project\多签地址代码\safe-contracts-main\safe-contracts-main\contracts
