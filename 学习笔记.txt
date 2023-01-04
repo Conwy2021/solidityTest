@@ -422,7 +422,7 @@ npm install -save-dev moduleName # -save-dev 的意思是将模块安装到项�
 
 npx hardhat compile 报错解决 
 H88 Error: Invalid account: #0 for network: mumbai - Expected string, received undefined
-复制.env文件 
+创建 .env文件 应该时依赖环境文件 导致无法编译 这个环境文件 是全局变量 一般放置私钥 和一些公网测试网地址
 
 文件直接打开依赖库的文件
 npm install hardhat 下载依赖包
