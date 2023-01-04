@@ -484,3 +484,6 @@ getManager(address _addr) 判断如果是初始值（0地址）则返回输入�
 加载本地文件至浏览器  安装说明https://blog.csdn.net/qq_33842966/article/details/121888985
 cmd 中 执行
 remixd -s D:\work\Project\多签地址代码\safe-contracts-main\safe-contracts-main\contracts
+
+--多签合约相关--
+https://app.safe.global/welcome  官方网址 可以链接测试网进行测试 
