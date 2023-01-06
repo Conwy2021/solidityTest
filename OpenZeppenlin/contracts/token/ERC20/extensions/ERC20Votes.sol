@@ -40,14 +40,14 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
     /**
      * @dev Get the `pos`-th checkpoint for `account`.
      */
-    function checkpoints(address account, uint32 pos) public view virtual returns (Checkpoint memory) {
+    function checkpoints(address account, uint32 pos) public view virtual returns (Checkpoint memory) {// 查询当前用户 根据下标 返回 对应的区块号和此区块时总共接收到的投票数
         return _checkpoints[account][pos];
     }
 
     /**
      * @dev Get number of checkpoints for `account`.
      */
-    function numCheckpoints(address account) public view virtual returns (uint32) {
+    function numCheckpoints(address account) public view virtual returns (uint32) { // 查询当前用户 接收过几次投票
         return SafeCast.toUint32(_checkpoints[account].length);
     }
 
@@ -61,7 +61,7 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
     /**
      * @dev Gets the current votes balance for `account`
      */
-    function getVotes(address account) public view virtual override returns (uint256) {
+    function getVotes(address account) public view virtual override returns (uint256) {// 查询 此地址共接收到多少投票
         uint256 pos = _checkpoints[account].length;
         return pos == 0 ? 0 : _checkpoints[account][pos - 1].votes;
     }
@@ -73,7 +73,7 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
      *
      * - `blockNumber` must have been already mined
      */
-    function getPastVotes(address account, uint256 blockNumber) public view virtual override returns (uint256) {
+    function getPastVotes(address account, uint256 blockNumber) public view virtual override returns (uint256) {// 查询当前用户 在指定区块时 已经接收到的票数  
         require(blockNumber < block.number, "ERC20Votes: block not yet mined");
         return _checkpointsLookup(_checkpoints[account], blockNumber);
     }
@@ -123,7 +123,7 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
     /**
      * @dev Delegate votes from the sender to `delegatee`.
      */
-    function delegate(address delegatee) public virtual override {
+    function delegate(address delegatee) public virtual override {// 投票 自身的balance  代表票数
         _delegate(_msgSender(), delegatee);
     }
 
