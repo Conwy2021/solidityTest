@@ -485,5 +485,6 @@ getManager(address _addr) 判断如果是初始值（0地址）则返回输入�
 cmd 中 执行
 remixd -s D:\work\Project\多签地址代码\safe-contracts-main\safe-contracts-main\contracts
 
+remix 编译文件过大时 在Advanced Configurations 中勾选Enable optimization
 --多签合约相关--
 https://app.safe.global/welcome  官方网址 可以链接测试网进行测试 
