@@ -60,10 +60,10 @@ library UniswapV2Library {
     //如果是2个和多个代币对 完成兑换 最少也是两个代币地址
     // performs chained getAmountOut calculations on any number of pairs //todo path 存的是代币地址
     function getAmountsOut(address factory, uint amountIn, address[] memory path) internal view returns (uint[] memory amounts) {
-        require(path.length >= 2, 'UniswapV2Library: INVALID_PATH');
+        require(path.length >= 2, 'UniswapV2Library: INVALID_PATH');//
         amounts = new uint[](path.length);
-        amounts[0] = amountIn;
-        for (uint i; i < path.length - 1; i++) {
+        amounts[0] = amountIn;//返回的是 amounts[1]兑换出的代币数量 amounts[0] 返回的是 投入的数量
+        for (uint i; i < path.length - 1; i++) {// amounts 可以含有三个以上的数据 因为兑换路径可能是其他代币在中间
             (uint reserveIn, uint reserveOut) = getReserves(factory, path[i], path[i + 1]);
             amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
         }
