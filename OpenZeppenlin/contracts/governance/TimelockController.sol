@@ -24,10 +24,10 @@ import "../utils/Address.sol";
  * _Available since v3.3._
  */
 contract TimelockController is AccessControl, IERC721Receiver, IERC1155Receiver {
-    bytes32 public constant TIMELOCK_ADMIN_ROLE = keccak256("TIMELOCK_ADMIN_ROLE");
-    bytes32 public constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");
-    bytes32 public constant EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");
-    bytes32 public constant CANCELLER_ROLE = keccak256("CANCELLER_ROLE");
+    bytes32 public constant TIMELOCK_ADMIN_ROLE = keccak256("TIMELOCK_ADMIN_ROLE");// admin
+    bytes32 public constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");// 申请
+    bytes32 public constant EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");// 执行
+    bytes32 public constant CANCELLER_ROLE = keccak256("CANCELLER_ROLE");// 取消
     uint256 internal constant _DONE_TIMESTAMP = uint256(1);
 
     mapping(bytes32 => uint256) private _timestamps;

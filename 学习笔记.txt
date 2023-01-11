@@ -9,7 +9,7 @@ pure 包含pure关键字的函数，不能读取也不能写入存储在链上�
 view/constant 包含view关键字的函数，能读取但也不能写入状态变量。
 都不写 函数既可以读取也可以写入状态变量。
 payable 运行的时候可以给合约转入ETH 就是说使用这个函数需要给合约转钱 可以转0 
-payable 在没有receive 或者fallback 函数的合约中 也是可以接收钱的 他的逻辑是把钱给这个函数 不是给这个合约再给这个函数 
+payable 在没有receive 或者fallback 函数的合约中 也是可以接收钱的 他的逻辑是把平台币给这个函数 不是给这个合约再给这个函数  是给这个函数 然后就跑合约里去了
 
 状态变量储存位置修饰符
 storage：变量储存在存储中，且需要在赋值之前提前预备空间，且多个同类型之间传值是指针地址引用。
@@ -422,7 +422,7 @@ npm install -save-dev moduleName # -save-dev 的意思是将模块安装到项�
 
 npx hardhat compile 报错解决 
 H88 Error: Invalid account: #0 for network: mumbai - Expected string, received undefined
-复制.env文件 
+创建 .env文件 应该时依赖环境文件 导致无法编译 这个环境文件 是全局变量 一般放置私钥 和一些公网测试网地址
 
 文件直接打开依赖库的文件
 npm install hardhat 下载依赖包
@@ -484,3 +484,7 @@ getManager(address _addr) 判断如果是初始值（0地址）则返回输入�
 加载本地文件至浏览器  安装说明https://blog.csdn.net/qq_33842966/article/details/121888985
 cmd 中 执行
 remixd -s D:\work\Project\多签地址代码\safe-contracts-main\safe-contracts-main\contracts
+
+remix 编译文件过大时 在Advanced Configurations 中勾选Enable optimization
+--多签合约相关--
+https://app.safe.global/welcome  官方网址 可以链接测试网进行测试 
