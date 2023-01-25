@@ -432,7 +432,7 @@ npm install hardhat 下载依赖包
 --钱包签名 相关--
 一般签名
 https://github.com/AmazingAng/WTF-Solidity/tree/main/37_Signature
-此处使用api 还有种用法 eth_sign 
+此处使用api 还有种用法 eth_sign  常见的 交易签名 是为了给小户节省gas
 712签名使用 
 https://stackoverflow.com/questions/67947640/calculate-message-hash-for-eth-signtypeddata
 
