@@ -15,9 +15,9 @@ abstract contract GovernorCountingSimple is Governor {
      * @dev Supported vote types. Matches Governor Bravo ordering.
      */
     enum VoteType {
-        Against,
-        For,
-        Abstain
+        Against,// 反对
+        For,//赞成
+        Abstain// 弃权
     }
 
     struct ProposalVote {
@@ -63,16 +63,16 @@ abstract contract GovernorCountingSimple is Governor {
 
     /**
      * @dev See {Governor-_quorumReached}.
-     */
+     *///返回投票的人数是否到达最低要求
     function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
-
+        //quorum(proposalSnapshot(proposalId)) 返回百分比的投票要求数量
         return quorum(proposalSnapshot(proposalId)) <= proposalvote.forVotes + proposalvote.abstainVotes;
     }
 
     /**
      * @dev See {Governor-_voteSucceeded}. In this module, the forVotes must be strictly over the againstVotes.
-     */
+     */// 赞成 大于 反对
     function _voteSucceeded(uint256 proposalId) internal view virtual override returns (bool) {
         ProposalVote storage proposalvote = _proposalVotes[proposalId];
 

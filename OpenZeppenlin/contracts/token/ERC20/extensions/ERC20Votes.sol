@@ -34,13 +34,13 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
         keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
 
     mapping(address => address) private _delegates;
-    mapping(address => Checkpoint[]) private _checkpoints;
+    mapping(address => Checkpoint[]) private _checkpoints;// 核心存储参数
     Checkpoint[] private _totalSupplyCheckpoints;
 
     /**
      * @dev Get the `pos`-th checkpoint for `account`.
      */
-    function checkpoints(address account, uint32 pos) public view virtual returns (Checkpoint memory) {// 查询当前用户 根据下标 返回 对应的区块号和此区块时总共接收到的投票数
+    function checkpoints(address account, uint32 pos) public view virtual returns (Checkpoint memory) {// 查询当前用户 根据下标 返回 对应的区块号和此区块时共有用权重数量
         return _checkpoints[account][pos];
     }
 
@@ -61,7 +61,7 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
     /**
      * @dev Gets the current votes balance for `account`
      */
-    function getVotes(address account) public view virtual override returns (uint256) {// 查询 此地址共接收到多少投票
+    function getVotes(address account) public view virtual override returns (uint256) {// 查询 此地址拥有多少票
         uint256 pos = _checkpoints[account].length;
         return pos == 0 ? 0 : _checkpoints[account][pos - 1].votes;
     }
@@ -69,7 +69,7 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
     /**
      * @dev Retrieve the number of votes for `account` at the end of `blockNumber`.
      *
-     * Requirements:
+     * Requirements: 这个应该是核心用法 
      *
      * - `blockNumber` must have been already mined
      */
@@ -94,7 +94,7 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
     /**
      * @dev Lookup a value in a list of (sorted) checkpoints.
      */
-    function _checkpointsLookup(Checkpoint[] storage ckpts, uint256 blockNumber) private view returns (uint256) {
+    function _checkpointsLookup(Checkpoint[] storage ckpts, uint256 blockNumber) private view returns (uint256) {// conwy 待理解 感觉类似2分法  找到区块号对应的下标
         // We run a binary search to look for the earliest checkpoint taken after `blockNumber`.
         //
         // During the loop, the index of the wanted checkpoint remains in the range [low-1, high).
@@ -123,7 +123,7 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
     /**
      * @dev Delegate votes from the sender to `delegatee`.
      */
-    function delegate(address delegatee) public virtual override {// 投票 自身的balance  代表票数
+    function delegate(address delegatee) public virtual override {// 投票权益转移 自身的balance  代表票数
         _delegate(_msgSender(), delegatee);
     }
 
@@ -156,7 +156,7 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
         return type(uint224).max;
     }
 
-    /**
+    /**amount 是增量 _add 是传入的函数 是加法函数
      * @dev Snapshots the totalSupply after it has been increased.
      */
     function _mint(address account, uint256 amount) internal virtual override {
@@ -223,7 +223,7 @@ abstract contract ERC20Votes is IVotes, ERC20Permit {
         }
     }
 
-    function _writeCheckpoint(
+    function _writeCheckpoint(// 写入权重 核心函数
         Checkpoint[] storage ckpts,
         function(uint256, uint256) view returns (uint256) op,
         uint256 delta

@@ -12,14 +12,14 @@ import "../utils/introspection/ERC165.sol";
  */
 abstract contract IGovernor is IERC165 {
     enum ProposalState {
-        Pending,
-        Active,
-        Canceled,
-        Defeated,
-        Succeeded,
-        Queued,
-        Expired,
-        Executed
+        Pending,// 0
+        Active,//1
+        Canceled,//2
+        Defeated,//3
+        Succeeded,//4
+        Queued,//5
+        Expired,//6
+        Executed//7
     }
 
     /**

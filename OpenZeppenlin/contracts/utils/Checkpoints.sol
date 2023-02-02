@@ -21,7 +21,7 @@ library Checkpoints {
     }
 
     struct History {
-        Checkpoint[] _checkpoints;
+        Checkpoint[] _checkpoints;//存储的是用户的投票票数 是可以累加的 也可以别人授权别人票数 给自己
     }
 
     /**
@@ -36,7 +36,7 @@ library Checkpoints {
      * @dev Returns the value at a given block number. If a checkpoint is not available at that block, the closest one
      * before it is returned, or zero otherwise.
      */
-    function getAtBlock(History storage self, uint256 blockNumber) internal view returns (uint256) {
+    function getAtBlock(History storage self, uint256 blockNumber) internal view returns (uint256) {//通过2分法 查找到复核要求的区块号位置
         require(blockNumber < block.number, "Checkpoints: block not yet mined");
 
         uint256 high = self._checkpoints.length;
@@ -57,7 +57,7 @@ library Checkpoints {
      *
      * Returns previous value and new value.
      */
-    function push(History storage self, uint256 value) internal returns (uint256, uint256) {
+    function push(History storage self, uint256 value) internal returns (uint256, uint256) {// conwy  Checkpoints的push
         uint256 pos = self._checkpoints.length;
         uint256 old = latest(self);
         if (pos > 0 && self._checkpoints[pos - 1]._blockNumber == block.number) {

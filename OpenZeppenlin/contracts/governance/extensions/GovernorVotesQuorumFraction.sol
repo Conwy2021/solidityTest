@@ -13,7 +13,7 @@ import "../../utils/math/SafeCast.sol";
  *
  * _Available since v4.3._
  */
-abstract contract GovernorVotesQuorumFraction is GovernorVotes {
+abstract contract GovernorVotesQuorumFraction is GovernorVotes {//conwy  设置通过提案比例 
     using Checkpoints for Checkpoints.History;
 
     uint256 private _quorumNumerator; // DEPRECATED
@@ -69,7 +69,7 @@ abstract contract GovernorVotesQuorumFraction is GovernorVotes {
     /**
      * @dev Returns the quorum for a block number, in terms of number of votes: `supply * numerator / denominator`.
      */
-    function quorum(uint256 blockNumber) public view virtual override returns (uint256) {
+    function quorum(uint256 blockNumber) public view virtual override returns (uint256) {//返回区块号的 提案成功比例要求
         return (token.getPastTotalSupply(blockNumber) * quorumNumerator(blockNumber)) / quorumDenominator();
     }
 

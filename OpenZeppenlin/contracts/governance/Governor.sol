@@ -180,7 +180,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor, IERC721Receive
      * @dev See {IGovernor-proposalSnapshot}.
      */
     function proposalSnapshot(uint256 proposalId) public view virtual override returns (uint256) {
-        return _proposals[proposalId].voteStart.getDeadline();
+        return _proposals[proposalId].voteStart.getDeadline();// _proposals[proposalId].voteStart 返回Timers.BlockNumber。 .getDeadline()返回时间戳
     }
 
     /**
@@ -248,22 +248,22 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor, IERC721Receive
         bytes[] memory calldatas,
         string memory description
     ) public virtual override returns (uint256) {
-        require(
+        require(//检测创建提案 门槛  一般是 拥有多少代币数量限制
             getVotes(_msgSender(), block.number - 1) >= proposalThreshold(),
             "Governor: proposer votes below proposal threshold"
         );
-
+        //这里其实只记录所有字段的hash 不记录 具体内容
         uint256 proposalId = hashProposal(targets, values, calldatas, keccak256(bytes(description)));
 
         require(targets.length == values.length, "Governor: invalid proposal length");
         require(targets.length == calldatas.length, "Governor: invalid proposal length");
         require(targets.length > 0, "Governor: empty proposal");
 
-        ProposalCore storage proposal = _proposals[proposalId];
+        ProposalCore storage proposal = _proposals[proposalId];//如果是第一次这里是空结构体
         require(proposal.voteStart.isUnset(), "Governor: proposal already exists");
-
-        uint64 snapshot = block.number.toUint64() + votingDelay().toUint64();
-        uint64 deadline = snapshot + votingPeriod().toUint64();
+        //votingDelay() 返回 多久后开始投票 votingPeriod() 返回 投票的持续时长
+        uint64 snapshot = block.number.toUint64() + votingDelay().toUint64();//以区块为单位
+        uint64 deadline = snapshot + votingPeriod().toUint64();//以区块为单位
 
         proposal.voteStart.setDeadline(snapshot);
         proposal.voteEnd.setDeadline(deadline);
@@ -356,7 +356,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor, IERC721Receive
         bytes[] memory, /* calldatas */
         bytes32 /*descriptionHash*/
     ) internal virtual {
-        if (_executor() != address(this)) {
+        if (_executor() != address(this)) {//满足这个条件需要重写 _executor()
             if (!_governanceCall.empty()) {
                 _governanceCall.clear();
             }
@@ -410,7 +410,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor, IERC721Receive
     /**
      * @dev See {IGovernor-castVote}.
      */
-    function castVote(uint256 proposalId, uint8 support) public virtual override returns (uint256) {
+    function castVote(uint256 proposalId, uint8 support) public virtual override returns (uint256) {//conwy 投票 support 是枚举类 使用 0 1 2
         address voter = _msgSender();
         return _castVote(proposalId, voter, support, "");
     }
@@ -512,7 +512,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor, IERC721Receive
      *
      * Emits a {IGovernor-VoteCast} event.
      */
-    function _castVote(
+    function _castVote(// conwy 投票内部函数
         uint256 proposalId,
         address account,
         uint8 support,
@@ -521,10 +521,13 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor, IERC721Receive
     ) internal virtual returns (uint256) {
         ProposalCore storage proposal = _proposals[proposalId];
         require(state(proposalId) == ProposalState.Active, "Governor: vote not currently active");
-
+        //conwy 投票核心逻辑 第一步 计算投票人在提案开始时的票数 conwy 投票核心逻辑 
+        //第二步 累加到提案详细中 只有第一步 是和token 相关的操作 
+        //获取 在指定区块号 投票权重 _getVotes 在 OpenZeppenlin\contracts\governance\extensions\GovernorVotes.sol
+        //此函数需要自己写实现类
         uint256 weight = _getVotes(account, proposal.voteStart.getDeadline(), params);
         _countVote(proposalId, account, support, weight, params);
-
+        // _countVote 在OpenZeppenlin\contracts\governance\extensions\GovernorCountingSimple.sol
         if (params.length == 0) {
             emit VoteCast(account, proposalId, support, weight, reason);
         } else {
@@ -544,7 +547,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor, IERC721Receive
         address target,
         uint256 value,
         bytes calldata data
-    ) external virtual onlyGovernance {
+    ) external virtual onlyGovernance {//只能合约调用 
         Address.functionCallWithValue(target, data, value);
     }
 
@@ -553,7 +556,7 @@ abstract contract Governor is Context, ERC165, EIP712, IGovernor, IERC721Receive
      * through another contract such as a timelock.
      */
     function _executor() internal view virtual returns (address) {
-        return address(this);
+        return address(this);//可以重写 此函数 
     }
 
     /**
