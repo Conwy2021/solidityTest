@@ -408,7 +408,10 @@ hex(1157920892373161954235709850086879078532699846656405640394575840079131296399
  在hardhat 中  npx hardhat run .\scripts\deploy.ts  执行  
  npx hardhat test  执行的是测试文件 会打印返回与预想是否一致 写法也不同
  局部安装的模块 使用npx 进行操作  
- 全局安装会按到C盘下 不让执行脚本 
+ 全局安装会按到C盘下 不让执行脚本(当你安装了安全软件时) 
+
+ 执行js 文件时
+ npx hardhat test .\scripts\deploy.js   
 
  --npm install 说明--
  npm install moduleName # 安装模块到项目目录下
