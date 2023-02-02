@@ -209,7 +209,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
     }
 
     // force reserves to match balances
-    function sync() external lock {
+    function sync() external lock {//这一步是 更新池子中实际代币数量 至 reserve（存量） 参数中
         _update(IERC20(token0).balanceOf(address(this)), IERC20(token1).balanceOf(address(this)), reserve0, reserve1);
     }
 }

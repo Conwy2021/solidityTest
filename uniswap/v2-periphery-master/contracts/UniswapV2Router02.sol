@@ -221,7 +221,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             );//amount1Out  转换后的代币数量 todo
         }
     }
-    function swapExactTokensForTokens(
+    function swapExactTokensForTokens(// 投入确切的数量 出多少
         uint amountIn,
         uint amountOutMin,
         address[] calldata path,//path 放两个代币的地址
@@ -235,7 +235,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         );//todo 这里先把input 代币转给pair合约
         _swap(amounts, path, to);
     }
-    function swapTokensForExactTokens(// conwy  测试此方法 
+    function swapTokensForExactTokens(// conwy  测试此方法  想出确切的数量 投入计算好的数量
         uint amountOut,//50000000000000000000
         uint amountInMax,
         address[] calldata path,//代币地址：{aest,usdt}
@@ -249,7 +249,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         );// 合约收到的 比实际要小 <5015045135406218655967904 要扣除10%
         _swap(amounts, path, to);//amounts[5015045135406218655967904,50000000000000000000] path [aset,usdt]
     }
-    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) // 入for 出
         external
         virtual
         override
