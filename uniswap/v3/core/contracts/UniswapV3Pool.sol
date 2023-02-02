@@ -770,13 +770,13 @@ contract UniswapV3Pool is IUniswapV3Pool, NoDelegateCall {
             : (state.amountCalculated, amountSpecified - state.amountSpecifiedRemaining);
 
         // do the transfers and collect payment
-        if (zeroForOne) {
+        if (zeroForOne) {//conwy  true 表示token0 进池子 token1出池子 既使用token0 兑换token1 出货token0
             if (amount1 < 0) TransferHelper.safeTransfer(token1, recipient, uint256(-amount1));
 
             uint256 balance0Before = balance0();
             IUniswapV3SwapCallback(msg.sender).uniswapV3SwapCallback(amount0, amount1, data);
             require(balance0Before.add(uint256(amount0)) <= balance0(), 'IIA');
-        } else {
+        } else {// 进货token0
             if (amount0 < 0) TransferHelper.safeTransfer(token0, recipient, uint256(-amount0));
 
             uint256 balance1Before = balance1();
