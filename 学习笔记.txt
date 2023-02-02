@@ -465,6 +465,8 @@ function onERC1155Received(address operator, address from ,uint256 id , uint256 
 排除文件搜索 设置 
 OpenZeppenlin/*,openzeppelin-solidity/*
 
+Vscode怎么分屏在两个独立窗口中?
+CTRL+P. 输入: > Workspace: Duplicate As Workspace in New Window.
 
 --ERC1820 相关--
 
