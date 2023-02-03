@@ -493,3 +493,6 @@ remixd -s D:\work\Project\多签地址代码\safe-contracts-main\safe-contracts-
 remix 编译文件过大时 在Advanced Configurations 中勾选Enable optimization
 --多签合约相关--
 https://app.safe.global/welcome  官方网址 可以链接测试网进行测试 
+
+--罗技键盘 快捷键--
+Home键： Fn + 左方向键. End键： Fn + 右方向键 PageUP键： Fn + 上方向键 PageDown键： Fn + 下方向键.
