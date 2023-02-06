@@ -24,7 +24,7 @@ import "../TimelockController.sol";
  * _Available since v4.3._
  */
 abstract contract GovernorTimelockControl is IGovernorTimelock, Governor {
-    TimelockController private _timelock;
+    TimelockController private _timelock; //使用TimelockController 合约中的函数
     mapping(uint256 => bytes32) private _timelockIds;
 
     /**

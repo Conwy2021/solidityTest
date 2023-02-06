@@ -23,7 +23,7 @@ import "../utils/Address.sol";
  *
  * _Available since v3.3._
  */
-contract TimelockController is AccessControl, IERC721Receiver, IERC1155Receiver {
+contract TimelockController is AccessControl, IERC721Receiver, IERC1155Receiver {// conwy 设置 提案时间相关参数 及设置提案人和执行的
     bytes32 public constant TIMELOCK_ADMIN_ROLE = keccak256("TIMELOCK_ADMIN_ROLE");// admin
     bytes32 public constant PROPOSER_ROLE = keccak256("PROPOSER_ROLE");// 申请
     bytes32 public constant EXECUTOR_ROLE = keccak256("EXECUTOR_ROLE");// 执行
@@ -74,9 +74,9 @@ contract TimelockController is AccessControl, IERC721Receiver, IERC1155Receiver 
      * operations to perform future maintenance.
      */
     constructor(
-        uint256 minDelay,
-        address[] memory proposers,
-        address[] memory executors
+        uint256 minDelay, // conwy 执行提案前 需要等待的是时间 按秒算的 
+        address[] memory proposers, // 可以提案的地址 
+        address[] memory executors// 可以执行提案的地址
     ) {
         _setRoleAdmin(TIMELOCK_ADMIN_ROLE, TIMELOCK_ADMIN_ROLE);
         _setRoleAdmin(PROPOSER_ROLE, TIMELOCK_ADMIN_ROLE);

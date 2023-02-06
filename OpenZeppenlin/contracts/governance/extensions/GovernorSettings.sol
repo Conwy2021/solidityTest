@@ -10,10 +10,10 @@ import "../Governor.sol";
  *
  * _Available since v4.4._
  */
-abstract contract GovernorSettings is Governor {
+abstract contract GovernorSettings is Governor {//conwy 只是设置 投票时间的几个参数
     uint256 private _votingDelay;
     uint256 private _votingPeriod;
-    uint256 private _proposalThreshold;
+    uint256 private _proposalThreshold;// 发起提案 门槛
 
     event VotingDelaySet(uint256 oldVotingDelay, uint256 newVotingDelay);
     event VotingPeriodSet(uint256 oldVotingPeriod, uint256 newVotingPeriod);
@@ -27,9 +27,9 @@ abstract contract GovernorSettings is Governor {
         uint256 initialVotingPeriod,
         uint256 initialProposalThreshold
     ) {
-        _setVotingDelay(initialVotingDelay);
-        _setVotingPeriod(initialVotingPeriod);
-        _setProposalThreshold(initialProposalThreshold);
+        _setVotingDelay(initialVotingDelay);// conwy 投票 延后多久开始 这是区块号 来的
+        _setVotingPeriod(initialVotingPeriod);//投票时间  八成也是按区块号来的 
+        _setProposalThreshold(initialProposalThreshold);//提案门槛
     }
 
     /**

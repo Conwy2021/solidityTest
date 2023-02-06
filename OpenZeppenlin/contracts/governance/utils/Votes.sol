@@ -85,14 +85,14 @@ abstract contract Votes is IVotes, Context, EIP712 {
     /**
      * @dev Returns the delegate that `account` has chosen.
      */
-    function delegates(address account) public view virtual override returns (address) {
+    function delegates(address account) public view virtual override returns (address) {//初步认为是投票权转移给谁了
         return _delegation[account];
     }
 
     /**
      * @dev Delegates votes from the sender to `delegatee`.
      */
-    function delegate(address delegatee) public virtual override {
+    function delegate(address delegatee) public virtual override {//初步认为是转移自己的投票权给他人
         address account = _msgSender();
         _delegate(account, delegatee);
     }
@@ -129,7 +129,7 @@ abstract contract Votes is IVotes, Context, EIP712 {
         _delegation[account] = delegatee;
 
         emit DelegateChanged(account, oldDelegate, delegatee);
-        _moveDelegateVotes(oldDelegate, delegatee, _getVotingUnits(account));
+        _moveDelegateVotes(oldDelegate, delegatee, _getVotingUnits(account));//获取用户代币余额 _getVotingUnits(account)
     }
 
     /**
@@ -152,15 +152,18 @@ abstract contract Votes is IVotes, Context, EIP712 {
 
     /**
      * @dev Moves delegated votes from one delegate to another.
+     struct History {
+        Checkpoint[] _checkpoints;
+    }
      */
-    function _moveDelegateVotes(
+    function _moveDelegateVotes(    
         address from,
         address to,
         uint256 amount
     ) private {
         if (from != to && amount > 0) {
             if (from != address(0)) {
-                (uint256 oldValue, uint256 newValue) = _delegateCheckpoints[from].push(_subtract, amount);
+                (uint256 oldValue, uint256 newValue) = _delegateCheckpoints[from].push(_subtract, amount);//使用checkpoints库中push
                 emit DelegateVotesChanged(from, oldValue, newValue);
             }
             if (to != address(0)) {
