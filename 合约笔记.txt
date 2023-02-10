@@ -1,0 +1,492 @@
+语法汇总
+函数可见说明
+public: 内部外部均可见，并且自动给stoage变量生成 getter 函数 。
+private: 只能从本合约内部访问，继承的合约也不能用。
+external: 只能从合约外部访问（但是可以用this.f()来调用，f是函数名）
+internal: 只能从合约内部访问，继承的合约可以用。
+[pure|view|payable]：决定函数权限/功能的关键字。
+pure 包含pure关键字的函数，不能读取也不能写入存储在链上的状态变量。
+view/constant 包含view关键字的函数，能读取但也不能写入状态变量。
+都不写 函数既可以读取也可以写入状态变量。
+payable 运行的时候可以给合约转入ETH 就是说使用这个函数需要给合约转钱 可以转0 
+payable 在没有receive 或者fallback 函数的合约中 也是可以接收钱的 他的逻辑是把平台币给这个函数 不是给这个合约再给这个函数  是给这个函数 然后就跑合约里去了
+
+状态变量储存位置修饰符
+storage：变量储存在存储中，且需要在赋值之前提前预备空间，且多个同类型之间传值是指针地址引用。
+memory：变量储临时存在内存中，可以动态开辟空间。 
+calldata：只读的，且不会永久存储的位置。
+
+局部变量及状态变量的位置默认为storage，函数参数包括返回的参数都是memory
+外部函数的参数（非返回参数）的数据位置被强制指定为 calldata
+
+三种类型的数据结构 Structs Arrays mappings
+
+变量类型
+
+值类型 值传递
+布尔型 bool true false
+整型 int、uint
+定长浮点型 未完全支持
+默认值  bool 就是 false，uint、int 就是 0，string 就是空字符串。
+地址类型（重点）
+address：保存一个20字节的值（以太坊地址的大小）。
+0x111122223333444455556666777788889999aAaa 必须写全 20字节
+address payable ：可支付地址，与 address 相同，不过有成员函数 transfer 和 send 。
+balance 和 transfer 成员
+send 是 transfer 的低级版本。如果执行失败，当前的合约不会因为异常而终止，但 send 会返回 false
+call， delegatecall 和 staticcall
+
+Solidity 中 immutable (不可变量)与constant(常量)
+
+定长字节数组 bytes1， bytes2， bytes3， …， bytes32
+可以将 bytes1[] 当作字节数组使用，但由于填充规则，每个元素会浪费 31 字节（storage存储除外），因此更好地做法是使用 bytes。
+
+引用类型
+如果使用引用类型，则必须明确指明数据存储哪种类型的位置（空间）里：
+内存memory 即数据在内存中，因此数据仅在其生命周期内（函数调用期间）有效。不能用于外部调用。
+存储storage 状态变量保存的位置，只要合约存在就一直存储．
+调用数据calldata 用来保存函数参数的特殊数据位置，是一个只读位置。
+
+数组
+ uint[] b;
+变长字节数组
+bytes 和 string 也是数组
+我们更多时候应该使用 bytes 而不是 bytes1[] ，因为Gas 费用更低, 在 内存memory 中使用 bytes1[] 时，会在元素之间添加31个填充字节。 而在 存储storage 中，由于紧密包装，这没有填充字节， 参考 bytes and string 。 作为一个基本规则，对任意长度的原始字节数据使用 bytes，对任意长度字符串（UTF-8）数据使用 string 。
+length: 数组有一个包含元素数量的length成员，memory数组的长度在创建后是固定的。
+push(): 动态数组和bytes拥有push()成员，可以在数组最后添加一个0元素。
+push(x): 动态数组和bytes拥有push(x)成员，可以在数组最后添加一个x元素。
+pop(): 动态数组和bytes拥有pop()成员，可以移除数组最后一个元素。
+
+结构体
+
+映射
+
+delete a会让变量a的值变为初始值。
+
+
+error NotEnoughFunds(uint requested, uint available);
+使用
+    revert NotEnoughFunds(amount, balance);
+
+转帐相关
+	
+msg.data (bytes): 完整的 calldata 数据
+msg.sender (address): 消息调用者 (当前调用)
+msg.sig (bytes4): calldata的前 4 个字节 (如：函数签名)
+msg.value (uint): 与消息一起发送的以太币（wei为单位）
+
+/* 触发fallback() 还是 receive()?
+           接收ETH
+              |
+         msg.data是空？
+            /  \
+          是    否
+          /      \
+receive()存在?   fallback()
+        / \
+       是  否
+      /     \
+receive()  fallback   
+    */
+	必须存在receive() 或者带有 payable 的fallback() 才能接收转账
+    receive()函数不能有任何的参数，不能返回任何值，必须包含external和payable。
+	fallback()必须由external修饰，一般也会用payable修饰，用于接收ETH:fallback() external payable { ... } 这个函数不能有参数也不能有返回值
+call没有gas限制，最为灵活，是最提倡的方法； _to.call{value: amount}(""); _to 是address 这个address 是目标地址 返回两个参数 bool 和 bytes memory data
+transfer有2300 gas限制，但是发送失败会自动revert交易，是次优选择；  _to.transfer(amount); 无返回值
+send有2300 gas限制，而且发送失败不会自动revert交易，几乎没有人用它。 _to.send(amount);  返回值 bool
+
+---call 返回值理解--------
+对于任意的低级别调用，需要检验调用的返回值，并做出对应的反馈
+如果仅仅是eth转账，改用transfer()而不是send()
+
+后来改为推荐使用transfer来转账
+
+
+低级别调用中产生异常的原因：
+1、代码中主动revert()
+2、gas不足
+3、超过了1024调用栈深度
+
+低级别调用（Low Level Calls）包含：
+1、call()：发出低级别调用，若发生异常则返回false
+2、callcode()：发出低级别调用(类似代码注入)，若发生异常则返回false
+3、delegatecall()：与call的区别在与msg指向不同
+  send()：发送指定数量的wei到这个地址，若发生异常则返回false
+
+低级别调用与普通函数调用（contract call）的区别：
+1、普通调用中抛出异常事，异常会沿着函数调用栈向上传递
+2、低级别调用中抛出异常，仅会返回false
+3、引发问题：对于低级别的调用，如果不对返回值进行检验，将不能获知低级别调用的结果
+
+
+---------单位相关------------------
+ether   1e18 wei
+finney  1e15 wei
+Gwei    1e9 wei
+wei     1
+
+---------合约调用合约------------
+我们可以利用合约的地址和合约代码（或接口）来创建合约的引用：_Name(_Address)，其中_Name是合约名，_Address是合约地址。然后用合约的引用来调用它的函数：_Name(_Address).f()，其中f()是要调用的函数。
+这个合约 可以存在相同代码 但是地址不同 的情况
+所以有 OtherContract(_Address).setX(x);  指定地址的合约进行调用
+
+OtherContract(_Address).setX(x){value:msg.value}  调用另一个合约的函数并传递平台币 
+OtherContract(_Address).setX(x){gas: 1000000, value: 1 ether} 还可以设置gas限制 
+
+call是solidity官方推荐的通过触发fallback或receive函数发送ETH的方法。
+不推荐用call来调用另一个合约，因为当你调用不安全合约的函数时，你就把主动权交给了它。推荐的方法仍是声明合约变量后调用函数，见第21讲：调用其他合约
+当我们不知道对方合约的源代码或ABI，就没法生成合约变量；这时，我们仍可以通过call调用对方合约的函数。
+
+address call gas 和value 联合使用
+---------------------------
+address(nameReg).call{gas: 1000000, value: 1 ether}(abi.encodeWithSignature("register(string)", "MyName"));
+---------------------
+
+gaslimit 的意思是 你会投入gas的数量 也是限制最高gas的意思  可以发起交易时 在钱包中设置
+
+
+------创建合约----------
+
+CREATE 新地址 = hash(创建者地址, nonce)
+使用 Contract x = new Contract{value: _value}(params)
+其中Contract是要创建的合约名，x是合约对象（地址），如果构造函数是payable，可以创建时转入_value数量的ETH，params是新合约构造函数的参数。
+
+CREATE2 新地址 = hash("0xFF",创建者地址, salt, bytecode)
+使用 Contract x = new Contract{salt: _salt, value: _value}(params)
+其中Contract是要创建的合约名，x是合约对象（地址），_salt是指定的盐；如果构造函数是payable，可以创建时转入_value数量的ETH，params是新合约构造函数的参数。
+
+可以向预地址打钱 通过create2.sol 验证成功    这边重点说明下 地址 是都存在的 只要满足20btyes要求  只是说这个地址上有没有账号或者合约
+所以说 不能说不存在的地址 
+汇编写法
+assembly {
+            pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
+        }
+selfdestruct(payable(msg.sender)); 自毁用法
+
+同一地址不可部署两个合约，当第一个合约自毁后，可以部署上第二个合约。
+待分析链代码
+
+create2(v, p, n, s)
+使用内存 p 到 p + n 的代码创建新合约
+并发送 v wei
+并返回新地址
+where new address = 前 20 bytes of keccak256(0xff + address(this) + s + keccak256(mem[p…(p+n)))
+s = big-endian 256-bit value
+       
+----------------------- 
+import "hardhat/console.sol"; 导入这个函数 就可以使用console.log 
+
+selfdestruct是智能合约的紧急按钮，销毁合约并将剩余ETH转移到指定账户。
+ // 调用selfdestruct销毁合约，并把剩余的ETH转给msg.sender
+        selfdestruct(payable(msg.sender));
+		
+// delegatecall和call类似，都是低级函数
+// call: B call C, 语境为 C (msg.sender = B, C中的状态变量受影响)
+// delegatecall: B delegatecall C, 语境为B (msg.sender = A, B中的状态变量受影响)
+// 注意B和C的数据存储布局必须相同！变量类型、声明的前后顺序要相同，不然会搞砸合约。
+调用delegatecall来使用storage变量时其实依据并不是变量名而是变量的存储位
+
+----合约类型相关----
+
+如果未实现合约中的至少一个函数，则需要将合约标记为 abstract。 即使实现了所有功能，合同也可能被标记为abstract。
+
+如果合约继承自抽象合约，并且没有通过重写来实现所有未实现的函数， 它依然需要标记为抽象 abstract 合约.
+
+
+代币相关ERC20标准 用实际应用理解 最佳 例如众筹 A B 为原始股东  C D 为后面进来的人
+totalSupply: 返回代币总供给.
+
+balanceOf: 返回账户`account`所持有的代币数. 返回账户余额  A B 用的 
+
+tansfer: 转账 `amount` 单位代币，从调用者账户到另一账户 `to`. A B 之间转账用
+
+transferFrom： 通过授权机制，从`from`账户向`to`账户转账`amount`数量代币。转账的部分会从调用者的`allowance`中扣除。 C D  之间转账用
+
+approve： 调用者账户给`spender`账户授权 `amount`数量代币  A分给C 15个的过程
+
+allowance：  返回`owner`账户授权给`spender`账户的额度，默认为0 C或D 查询A 分自己多少
+
+还有几个可选接口
+
+function name() constant returns (string name) //返回这个令牌的名字，比如"MyToken".
+
+function symbol() constant returns (string symbol)//返回令牌的符号，比如HIX.
+
+function decimals() constant returns (uint8 decimals)//返回token使用的小数点后几位， 比如 8,表示分配token数量为100000000
+----------------常用存储格式--------------------------------------
+mapping (address => mapping (address => uint256)) allowed;　　// 类比二维数组
+
+mapping(address => uint256) balances;　　// 类比一维数组
+
+
+["0x1234567812345678123456781234567812345678123456781234567812345678","0x1234567812345678123456781234567812345678123456781234567812345678","0x1234567812345678123456781234567812345678123456781234567812345678"]
+这个写法 在remix 传入 	bytes32[3] memory _data  数组
+
+web3语法相关
+查看合约变量 （地址，下标）
+在remix 控制台 执行web3.eth.getStorageAt("0x260a7Fe2f46053518E061e96A9e2a88dBfcab2A6",1); 
+
+查看后续位置的
+web3.eth.getStorageAt("0x13b9cE1ee6b112FB896b021d2A1955ce0C184FcA","0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563");
+
+keccak256(0)=0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563
+keccak256(1)=0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6
+
+查看合约余额
+web3.eth.getBalance("0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8")
+
+------字符-相关----------
+ASCII码值 0 表示空字符，空字符就是平时所说的 '\0'。
+字符 '0'，ASCII码值为 48，如：“012” 字符串中的 0 表示字符 '0'。
+数字 0， 所说的数字 0，就是平时说的十进制数字 0，其ASCII码为 0，在字符串中表示 '\0'，即空字符。
+
+----scriptSig详细解释(比特币签名)----
+
+scriptSig里面有asm和hex2个字段，都是什么意思呢？
+
+上面的vin里面，第1个输入，这2个字段的值，分别为：
+
+"asm":"3044022055bac1856ecbc377dd5e869b1a84ed1d5228c987b098c095030c12431a4d524902
+
+048aefd78bba80e2d1686225b755dacea890c9ca1be10ec98173d7d5f2fefbbf881a6e918f3b05
+
+1f8aaaa3fcc18bbf65097ce8d30d5a7e5ef8d1005eaafd4b3fbe",
+
+ba2a509b5fbd6cac97ff3af0141048aefd78bba80e2d1686225b755dacea890c9ca1be10ec
+
+98173d7d5f2fefbbf881a6e918f3b051f8aaaa3fcc18bbf65097ce8d30d5a7e5
+
+ef8d1005eaafd4b3fbe"
+
+细心的读者会发现，这2个字段的值其实是一样的，只是hex在开头插入了字符47，中间插入了一个字符41，其他部分完全一样。
+
+asm为assembly（拼装，或者汇编的意思），hex为其16进制的表达。
+
+所以呢，这里的asm和hex就是同1个东西，里面包含了2部分：
+
+signature（付款人的私钥的签名） + pub key（付款人的公钥），以41这个字符隔开。
+Signature签名
+签名内容主要是此交易摘要（也就是交易信息的Hash）与私钥进行运算。验证的话，将签名与公钥进行运算，如果能正确的得到交易摘要，则成功
+之前的文章提到过，交易中被签名的消息，是交易本身。更准确的说，是通过 SIGHASH 标记区分的、交易中特定的数据子集。
+
+-------交易相关-----
+人 调用合约 合约调用另一个合约转钱  是在一个交易上进行的 也就是tx 是一个
+
+交易块 中  Transactions字段 的意思  前部分  人转人 或人转合约  后部分为 合约内部发送的交易
+Guess the new number 靶场笔记
+一个函数中 产生的操作（转账） 都在一个交易下 所以在一个函数中算出一个结果 再调用另外一个函数去算一个结果 两个结果是一样的
+也就是可以提前算出答案后，传递给另一个函数达到 答案一定正确
+
+---日志打印事件（可以理解成日志）----
+1、合约中打印事件 每次调用了合约中打印事件的方法 都会在合约中（链浏览器）上查看到  例如https://rinkeby.etherscan.io/address/0xdbccBf8eD1F63adb8a0b188Fb76FCE8a941cd5f1#events
+2、交易中调用了其他合约或者说触发了其他合约的打印事件 那么在本次交易中也会打印这个日志 例如 https://rinkeby.etherscan.io/tx/0x58f95b08ccf6e5d0719fd60511c95bc3d324a6f8a275c9fd8bd9f8cf282fd16b#eventlog
+对应代码为 king_Attack.sol
+
+闪电贷套利 是在一个链上（公链）有多个交易所  交易所中对同一种币的汇率 存在不同 根据这个机制进行买进卖出 
+
+相关金融产品概念解释
+https://wenx.zendesk.com/hc/zh-cn/categories/360002543352-%E6%B0%B8%E7%BB%AD%E5%90%88%E7%BA%A6-%E6%9D%A0%E6%9D%86-ETF
+
+-------ERC721-----------
+interfaceId  查询接口是否实现要求的接口
+
+例如 0x5b5e139f 计算就是:bytes4(keccak256(ERC721Metadata.name.selector)^keccak256(ERC721Metadata.symbol.selector)^keccak256(ERC721Metadata.tokenURI.selector))
+
+ ^ （异或）
+ 转发来自 https://www.liaoxuefeng.com/article/1461241857966113
+ NFT有两个标准：EIP-721和EIP-1155。721标准比较简单，它只需要保证一个NFT对应一个唯一的Token ID就行，因为一个Token ID对应的NFT只有一个，而1155就要宽松一点，一个NFT可以有多个，比如一个头像有10个，那最多允许10个人持有。如果每个NFT只发1个，那就和721没啥区别了。
+
+ ---uniswp相关-----
+ 在token买卖时，实际支付的价格和期望的交易价格之间的差别，称为交易滑点 --应该是原文的翻译
+ 所以说 这个场景 就是产出是一定时 才会出现支付的价格和期望的价格存在差别
+  滑点 是 实际成交数量-理论成交数量  是个差值
+
+  看到的滑点是百分比 
+  当输出一定时 是指 理论输入量x(1+a%)=实际消耗量;  也就是 (实际消耗-理论消耗)/理论消耗
+  当输入一定时 是指 理论产出量x(1-a%)=实际产生量;   也就是 (实际产出-理论产出)/理论产出
+  也就是 
+  当你输入的是一定out数量代币时 会比理论多in 一些代币
+  当你输入的是一定in 数量代币时 会比理论少out一些代币
+
+  也可以算作成交时单价=最初的单价x(1+滑点)   
+
+  套利 两个交易所 存在价格差  假设有一种代币T，它在去中心化交易所DEX A的价格是50USDT，而在去中心化交易所DEX B的价格是55USDT。
+
+  时间加权平均价 uniswp v2 提供一种线上获取价格的方法 需要自己去调用或者使用定时任务去获取。
+  每次swap burn mint 操作 都会更新 累计价格（每个块的第一笔交易）
+  公式 price0CumulativeLast = price0Cumulative + reserve1 / reserve0 * timeElapsed
+
+  impermanent loss是指你将加密货币放入uniswap中赚取的收益与你将加密货币放入钱包中的收益之间的差
+  初步理解 时 可以把一个币算成稳定币 好理解些
+  交易池的财富度量: rootK
+
+  UniswapV2 使用的价格预言机称为 TWAP（Time-Weighted Average Price） ，即时间加权平均价格 。  
+  计算时间间隔为 1 小时的 TWAP，取自开始和结束时的累计价格和两区块当时的时间戳，两者的累计价格相减，再除以两者之间的时间差，就算出这 1 小时内的 TWAP 价格
+
+  pair 合约中是swap
+  传入的参数为amountOut  需要计算amountIn
+  一般场景 amountOut ==0 amountIn!=0 ; amountOut !=0 amountIn=0
+  那么什么场景会出现 amountIn amountOut 都不为0 呢
+  闪电贷 先出代币 然后再还代币 就会出现这种场景 
+  balance0 = reserve0 + amount0In - amout0Out  amountIn = balance - (reserve - amountOut)
+  ----uniswapv2 质押合约 ---
+工厂合约操作
+  1、deploy部署抵押合约
+  2、调用notifyRewardAmounts 下发UNI奖励代币 及初始化挖矿速率（提前把UNI代币打到工厂合约） 更新lastUpdateTime为当前时间 更新挖矿结束时间挖矿periodFinish
+  
+
+  价值的理解 
+  比如 UNI 目前看只有治理权（投票权）就算有点实际作用的代币
+  那么看比特币 以太币 他们这些币 的价值 该如何理解呢？ 
+  这就是经济学 有人买 他的价值就是买的价格 买的人多了 价值就高了
+  和物品本身的作用 没有什么关系
+  uniswap 翻译位为自动化做市商 可以理解为中介  银行的本质其实也是中介
+
+----UQ112x112 说明-------
+  初步认识的地方 uniswapv2 pai合约中更新权平均数的累加，使用原因是减少精度丢失对单价的影响 
+  举例说明 2.5+2.5+2.5+2.5=10 
+  如果不考虑精度问题  2+2+2+2=8 
+  结果相差还是很大的 因此设计 先使用UQ112x112计算 最后再还原成正常数值
+  过程如下
+  2.5 使用UQ112x112表示为12980742146337069071326240823050240
+  那么 2.5+2.5+2.5+2.5 =12980742146337069071326240823050240*4=51922968585348276285304963292200960
+  还原51922968585348276285304963292200960为10
+  5/2 本质上是先把5扩了2**112倍 或者说把5 左移112位 
+  0x0000000000000000000000000005 变成0x00000000000000000000000000050000000000000000000000000000 —> 10进制表示为25961484292674138142652481646100480
+  25961484292674138142652481646100480/2=12980742146337069071326240823050240
+  12980742146337069071326240823050240 ->二进制表示0x00000000000000000000000000028000000000000000000000000000
+  用一个224位  前112位表示整数 后112位 表示小数
+  0000000000000000000000000002 表示整数2
+  8000000000000000000000000000 表示小数0.5  
+  0.5 -> 0.1B ->0100 0000    bit 转byte 使用16进制表示 80
+
+  补充说明小数转二进制表示
+  0.25 -> 0.01B -> 0010 0000 
+
+
+--闪电兑换 笔记--
+  闪电兑换示例代码 逻辑
+  v1 池子 20USDT/ETH 
+  v2 池子 30USDT/ETH
+  1、从v2 池子借20USDT 
+  2、到v1 池子兑换成1ETH
+  3、20USDT在v2池中 等价于 0.66ETH 所以 还v2 0.66ETH 等于还20USDT
+  4、剩0.34ETH就是利润
+
+--闪电贷套利相关---
+1、正常拉高交易池价格再进行兑换 这种方法是亏本的。
+2、bzx协议第一次攻击事件中 关键点为 使用1300ETH就拉高了BTC的价格（本应使用5637.62ETH拉高）PS：当时uniswap是V1
+3、分析认为 像这种拉高拉低行为后 往往会借助其他产品（以此时价格进行计算）进行获利操作，也就是说价格操控的目的是将异常的价格喂价给其他产品。
+
+--共识算法 相关---
+POS  以实际项目 理解 https://github.com/shockcoder/PoS-demo  参考文章https://zhuanlan.zhihu.com/p/31588809
+自我理解：也是计算一个hash 小于目标值 即可以记账（出块） 我们简单计为 hash<代币量*目标值   
+目标值不变 代币量越多 算出满足要求的hash值 就越大  例如 计算一个1到10的数的概率  小于 计算一个1到20的数的概率
+
+--工具使用 相关---
+python3  hex 转显示为string
+ bytes.fromhex('74657374207631')   返回 b'test v1'   类型是byte
+10进制转16进制
+hex(115792089237316195423570985008687907853269984665640564039457584007913129639935)
+16进制转10进制
+直接输入 0xff 回车
+
+
+ --测试框架hardhat 相关--
+ 1、安装nodejs
+ 2、执行 npm install hardhat  安装hardhat模块 默认下载hardhat.config.ts配置下的依赖
+ 3、npx hardhat test .\test\signUtil.spec.ts  执行测试ts文件 
+
+ npx hardhat compile					//编译默认的hardhat.config.ts配置下的合约文档
+ npx hardhat 查看 整体命令
+ npx hardhat --version 查看版本s
+ npx hardhat test 执行所有测试脚本
+
+ 执行ts 文件 步骤
+ 局部安装 npm install typescript  npm install  ts-node
+ 执行 npx ts-node foo.ts  
+ 在hardhat 中  npx hardhat run .\scripts\deploy.ts  执行  
+ npx hardhat test  执行的是测试文件 会打印返回与预想是否一致 写法也不同
+ 局部安装的模块 使用npx 进行操作  
+ 全局安装会按到C盘下 不让执行脚本(当你安装了安全软件时) 
+
+ 执行js 文件时
+ npx hardhat test .\scripts\deploy.js   
+
+ --npm install 说明--
+ npm install moduleName # 安装模块到项目目录下
+ 
+npm install -g moduleName # -g 的意思是将模块安装到全局，具体安装到磁盘哪个位置，要看 npm config prefix 的位置。
+ 
+npm install -save moduleName # -save 的意思是将模块安装到项目目录下，并在package文件的dependencies节点写入依赖。
+ 
+npm install -save-dev moduleName # -save-dev 的意思是将模块安装到项目目录下，并在package文件的devDependencies节点写入依赖。
+详细说明：https://segmentfault.com/a/1190000021468231
+
+npx hardhat compile 报错解决 
+H88 Error: Invalid account: #0 for network: mumbai - Expected string, received undefined
+创建 .env文件 应该时依赖环境文件 导致无法编译 这个环境文件 是全局变量 一般放置私钥 和一些公网测试网地址
+
+文件直接打开依赖库的文件
+npm install hardhat 下载依赖包
+会出现node_modules 文件夹 注意 vscode 打开文件时需要选择打开项目所在的目录才行
+
+
+--钱包签名 相关--
+一般签名
+https://github.com/AmazingAng/WTF-Solidity/tree/main/37_Signature
+此处使用api 还有种用法 eth_sign  常见的 交易签名 是为了给小户节省gas
+712签名使用 
+https://stackoverflow.com/questions/67947640/calculate-message-hash-for-eth-signtypeddata
+
+
+--订阅模式 操作 相关--
+./wscat -c 192.168.116.128:8546   安装wscat 找到安装目录使用
+具体使用方法http://cw.hubwiz.com/card/c/infura-api/1/3/8/
+
+
+--接口返回签名 代码写法--
+this.onERC1155Received.selector; 返回参数类型为bytes4
+完整写法 重入记得要有闭环 
+function onERC1155Received(address operator, address from ,uint256 id , uint256 value , bytes calldata data) public  returns(bytes4){
+       if(a==1){
+            a=a+1;
+            gacha.claim(9527);
+            return this.onERC1155Received.selector;
+        }
+        return this.onERC1155Received.selector;//0xf23a6e61
+    }
+
+--vscode 使用相关 --
+
+排除文件搜索 设置 
+OpenZeppenlin/*,openzeppelin-solidity/*
+
+Vscode怎么分屏在两个独立窗口中?
+CTRL+P. 输入: > Workspace: Duplicate As Workspace in New Window.
+
+--ERC1820 相关--
+
+bytes32 constant public ERC1820_ACCEPT_MAGIC = keccak256(abi.encodePacked("ERC1820_ACCEPT_MAGIC"));
+0xa2ef4600d742022d532d4747cb3547474667d6f13804902513b2ec01c848f4b4
+
+// keccak256("ERC777TokensSender")
+bytes32 constant internal TOKENS_SENDER_INTERFACE_HASH =
+0x29ddb589b1fb5fc7cf394961c1adf5f8c6454761adf795e67fe149f658abe895
+ // keccak256("ERC777TokensRecipient")
+ bytes32 constant internal TOKENS_RECIPIENT_INTERFACE_HASH =
+ 0xb281fc8c12954d22544db45de3159a39272895b169a852b314f9cc762e44c53b;
+
+getManager(address _addr) 判断如果是初始值（0地址）则返回输入的地址 也就限制了只有自己的合约可以设置自己的合约接口的哈希实现的地址
+
+--remix 扩展插件使用相关--
+加载本地文件至浏览器  安装说明https://blog.csdn.net/qq_33842966/article/details/121888985
+cmd 中 执行
+remixd -s D:\work\Project\多签地址代码\safe-contracts-main\safe-contracts-main\contracts
+
+remix 编译文件过大时 在Advanced Configurations 中勾选Enable optimization
+--多签合约相关--
+https://app.safe.global/welcome  官方网址 可以链接测试网进行测试 
+
+--罗技键盘 快捷键--
+Home键： Fn + 左方向键. End键： Fn + 右方向键 PageUP键： Fn + 上方向键 PageDown键： Fn + 下方向键.
