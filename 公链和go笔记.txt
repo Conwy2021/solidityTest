@@ -1,0 +1,44 @@
+--公链 相关--
+txpool 
+TxPool用來存放準備被寫入區塊的交易，包含 remote與 local
+交易又分兩種
+pending: 經過驗證（gas limit、nonce…等）後確定是可被執行的交易。
+queued: 已被提交但還不能夠被執行，例如 nonce跳號。
+
+
+
+--go 语言相关--
+
+init函数
+
+init函数先于main函数自动执行，不能被其他函数调用；
+init函数没有输入参数、返回值；
+每个包可以有多个init函数；
+包的每个源文件也可以有多个init函数，这点比较特殊；
+同一个包的init执行顺序，golang没有明确定义，编程时要注意程序不要依赖这个执行顺序。
+不同包的init函数按照包导入的依赖关系决定执行顺序。
+
+--go 打包相关--
+
+
+
+---idea 相关 ---
+windows 中添加环境变量 set DEBUG=true
+idea 中配好启动配置 在edit 中 environment 中 DEBUG=true
+
+a :=os.Getenv("DEBUG") 源码中 此处获取的是 系统环境变量的值
+
+idea 配置go 项目
+setting 设置中 go 下面
+goroot go的路径 一般安装好go 后 idea 会自己找到的 目录D:\soft\go
+gopath 可以每个项指定一个自己的gopath 也可用全局的 这里使用projiect GOPATH 设置到自己项目目录下 D:\work\projectTest\go-ethereum\gopath 不勾选 use GOPATH that's defined .... 和 index entire ..
+GO Moudules(vgo) 勾选 enable Go Modules ...  proxy 设置为https://mirrors.aliyun.com/goproxy/,direct 不勾选 Vendoring mode （如果项目使用vendor 管理依赖 就勾选下）
+
+
+--windows 相关--
+删除 文件夹、文件  rmdir 文件夹名、文件名
+
+
+
+
+
