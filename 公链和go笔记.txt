@@ -5,7 +5,40 @@ TxPool用來存放準備被寫入區塊的交易，包含 remote與 local
 pending: 經過驗證（gas limit、nonce…等）後確定是可被執行的交易。
 queued: 已被提交但還不能夠被執行，例如 nonce跳號。
 
+控制台常用命令
 
+txpool.status 查询待写入的数据
+miner.start(1);admin.sleepBlocks(1);miner.stop();  挖矿写入数据
+eth.sendTransaction({from:eth.accounts[0],to:eth.accounts[1],value:amount}) 转账
+eth.getBalance(eth.accounts[0]) 查询 账号 有多少币
+
+eth.blockNumber：查询区块总数；
+eth.getBlock(number) ：根据区块号查看区块信息，number为区块号。
+eth.getTransaction(txNo) 查询发起的交易详情  交易成功与否 不知道
+eth.getTransactionReceipt(txNo) 查询交易执行情况 可以看event
+eth.getTransactionFromBlock(number) 查询块 内的交易 
+eth.getTransactionCount(addr) 查看用户 nonce
+
+admin.peers参数说明
+network.inboud: true true 是站内连接 false 是站外连接
+
+启动命令说明
+--http --http.corsdomain="*" 跨域 使用浏览器可以访问节点  
+--http.port 8545 --http.addr "0.0.0.0" --http.api web3,eth,debug,personal,net  启动的模块
+--allow-insecure-unlock  知道开启 http 的 对外开放
+--ws --ws.addr "0.0.0.0" --ws.port 8546 WebSockets  服务
+-ws.api web3,eth,debug,personal,net 
+--unlock 0x2dfb1e33c2e793e3c1f64a89b54758e307d5e7e3 --password pass.txt 解锁的账户 和密码
+--mine 自动挖矿
+--bootnodes enode://cddba93323aa548ff232ac14aea5104ecbf7544d43ecb9b1e76284985afface13cbd8cf71e7de7f6d72c635803e063f8af955e22ae0abd575c2b1b87f117194d@127.0.0.1:30310
+这是路由节点 通过路由节点同步其他链
+--verbosity 5 打印日志等级
+--syncmode full 节点同步模式 full 
+windows 命令 
+--ipcdisable 进程复用 Disable the IPC-RPC server windows 启动时 复用 exe
+--ipcpath data5/geth5.ipc 知道ipc ipc路径 在日志查看 日志-> IPC endpoint opened                      url=\\.\pipe\data5/geth5.ipc
+windows 进入控制台
+.\roninWindows.exe attach 'http://localhost:8551'
 
 --go 语言相关--
 
@@ -18,8 +51,30 @@ init函数没有输入参数、返回值；
 同一个包的init执行顺序，golang没有明确定义，编程时要注意程序不要依赖这个执行顺序。
 不同包的init函数按照包导入的依赖关系决定执行顺序。
 
+
+两个main包 一个文件引用另一个文件使用
+go run  1文件.go 2文件.go
+
+make 	
+golang 分配内存主要有内置函数new和make，今天我们来探究一下make有哪些玩法。
+
+make只能为slice, map, channel分配内存，并返回一个初始化的值。首先来看下make有以下三种不同的用法：
+
+1. make(map[string]string)
+2. make([]int, 2)
+3. make([]int, 2, 4)
+
+&MyStruct{3, 4}  等于 new 结构体  等于初始化结构体
+
 --go 打包相关--
 
+go mod init 文件夹名 会在文件夹下 创建 go.mod 文件 意思 是项目用mod 形式进行依赖包管理
+go mod tidy  下载依赖包命令
+go get ..  手动下载依赖包
+go mod 下载的包 放在gopath目录里
+
+go mod vendor 当vendor 有依赖包 但是项目爆红无法找到时 
+go build  是编译go文件的命令 windows 编译成exe 文件 linux 编译成 linux的执行文件
 
 
 ---idea 相关 ---
@@ -34,9 +89,28 @@ goroot go的路径 一般安装好go 后 idea 会自己找到的 目录D:\soft\g
 gopath 可以每个项指定一个自己的gopath 也可用全局的 这里使用projiect GOPATH 设置到自己项目目录下 D:\work\projectTest\go-ethereum\gopath 不勾选 use GOPATH that's defined .... 和 index entire ..
 GO Moudules(vgo) 勾选 enable Go Modules ...  proxy 设置为https://mirrors.aliyun.com/goproxy/,direct 不勾选 Vendoring mode （如果项目使用vendor 管理依赖 就勾选下）
 
+编译geth 时 在cmd 控制台编译  此报错不影响打包 大致原因是go版本的问题 可忽略
+duk_minimal_printf.c: In function 'duk__parse_pointer':
+duk_minimal_printf.c:126:9: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  *out = (void *) val;
+         ^
+duk_minimal_printf.c: In function 'duk_minimal_vsnprintf':
+duk_minimal_printf.c:236:76: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+     off = duk__format_long(str, size, off, sizeof(void *) * 2, '0', 16, 0, (unsigned long) v);
 
 --windows 相关--
 删除 文件夹、文件  rmdir 文件夹名、文件名
+
+使用终端工具 win+s 搜 终端
+
+word 文档 删除 书签 直接在word自带的搜索中 输入书签 
+windows 终端启动命令 坑 unlock 后面的地址 不要加单引号  cmd 中需要加
+
+--linux 相关--
+Ctrl+S 暂停屏幕输出
+Ctrl+Q 继续屏幕输出
+
+构建命令 make all 是种类似打包脚本的命令 依赖文件Makefile 文件中写好执行命令脚本
 
 
 
