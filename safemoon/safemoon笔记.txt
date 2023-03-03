@@ -1,0 +1,12 @@
+safemoon 笔记
+
+不参加 通缩 就同步增加减少实体币和虚拟币
+
+默认都参加分红 
+_reflectFee(rFee, tFee);//减少整体的虚假币 记录手续费至手续费总量  减少的是_rTotal 整加_tFeeTotal
+
+ _takeLiquidity(tLiquidity);// 这一部分 给到了合约 后面会给到pair去
+ 
+ swapTokensForEth(half) swap 兑换时 无法保证给你计算的准确的金额 因此只能通过 减法 获取 你实际获得 的金额
+ address[] private _excluded 除外地址 除外的地址不参加通缩
+ mapping (address => bool) private _isExcluded  是否是除外地址 
