@@ -64,7 +64,7 @@ library UniswapV2Library {
         amounts = new uint[](path.length);
         amounts[0] = amountIn;//返回的是 amounts[1]兑换出的代币数量 amounts[0] 返回的是 投入的数量
         for (uint i; i < path.length - 1; i++) {// amounts 可以含有三个以上的数据 因为兑换路径可能是其他代币在中间
-            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i], path[i + 1]);
+            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i], path[i + 1]);//按token顺序 返回对应的数量
             amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
         }
     }
