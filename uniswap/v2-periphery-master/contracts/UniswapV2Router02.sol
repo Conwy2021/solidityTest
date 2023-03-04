@@ -224,7 +224,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     function swapExactTokensForTokens(// 投入确切的数量 出多少
         uint amountIn,
         uint amountOutMin,
-        address[] calldata path,//path 放两个代币的地址
+        address[] calldata path,//path 放两个代币的地址 path的顺序决定了兑换的方向
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
