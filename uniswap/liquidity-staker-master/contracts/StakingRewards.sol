@@ -22,7 +22,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
     uint256 public rewardRate = 0;//挖矿速率，即每秒挖矿奖励的数量
     uint256 public rewardsDuration = 60 days;//挖矿时长，默认设置为 60 天
     uint256 public lastUpdateTime;//最近一次更新时间
-    uint256 public rewardPerTokenStored;//每单位 token 奖励数量
+    uint256 public rewardPerTokenStored;// 每单位lptoken 奖励uni的数量的累加值
 
     mapping(address => uint256) public userRewardPerTokenPaid;//用户的每单位 token 奖励数量
     mapping(address => uint256) public rewards;//用户的奖励数量 累加计算的
@@ -55,21 +55,41 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
     function lastTimeRewardApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
     }
-    //获取每单位质押代币的奖励数量（截止到当前时间点）
-    function rewardPerToken() public view returns (uint256) {
+    //获取每单位质押代币的奖励数量的累加值（截止到当前时间点）
+    function rewardPerToken() public view returns (uint256) {//这里记录的是一个单位lp代币总奖励uni数。每秒*每秒奖励数量 累加  每次每秒奖励数量变化时都会更新此数据 每秒奖励数量=每秒uni数量/lp数量 每秒uni数量是固定的 因为lp数量会变 所以每秒奖励数量会变
         if (_totalSupply == 0) {
             return rewardPerTokenStored;
         }
         return
-            rewardPerTokenStored.add(
+            rewardPerTokenStored.add(//conwy 关键函数  用户只需要 每秒每个lp奖励多少UNI 并记录持续时间  当用户投入lp时记录此时的累加数 等到结算时用总的 减去记录的就行
                 lastTimeRewardApplicable().sub(lastUpdateTime).mul(rewardRate).mul(1e18).div(_totalSupply)
-            );//时间差x速率/质押代币总量 
+            );//时间差x每秒产出奖励代币/质押代币总量 
     }
     //计算用户当前的挖矿奖励
     function earned(address account) public view returns (uint256) {
         return _balances[account].mul(rewardPerToken().sub(userRewardPerTokenPaid[account])).div(1e18).add(rewards[account]);
     }//计算出增量的每单位质押代币的挖矿奖励，再乘以用户的质押余额得到增量的总挖矿奖励，再加上之前已存储的挖矿奖励，就得到当前总的挖矿奖励
      
+      /* ========== MODIFIERS ========== */
+
+    modifier updateReward(address account) {//更新挖矿奖励的 modifer
+        rewardPerTokenStored = rewardPerToken();//获取每单位质押代币的奖励数量累加值（截止到当前时间点）
+        lastUpdateTime = lastTimeRewardApplicable();//从当前区块时间和挖矿结束时间两者中返回最小值 挖矿结束后，lastUpdateTime 也会一直等于挖矿结束时间，这点很关键
+        if (account != address(0)) {
+            rewards[account] = earned(account);//计算上一阶段 获取的奖励
+            userRewardPerTokenPaid[account] = rewardPerTokenStored;//记录是上一阶段 每单位质押代币的奖励数量
+        }
+        _;
+    }//lastUpdateTime 第一次更新时 为工厂合约包奖励代币发放给抵押合约时 此时抵押合约正式开工
+    //第一次抵押时 A个 rewardPerTokenStored==0 ;earned(account)==0;抵押前触发modifier 此时_balances[account]为0
+    //第二次抵押时 B个 计算之前每个代币抵押的收益 rewardPerTokenStored是之前的每个代币（共A个）获取的奖励
+    //  earned(account)为_balances[account]（我上次抵押的代币数量A）X rewardPerTokenStored（这里等于rewardPerTokenStored.add(0)） 这里时存储我抵押时每块出的奖励
+    // rewardPerTokenStored 为   时间差x速率/质押代币总量 A                                                                                                                        
+    //  后将收益记录放入rewards[account]; rewardPerTokenStored也更新到 userRewardPerTokenPaid[account]
+    //第三次抵押时 计算之前每个代币抵押的收益 rewardPerTokenStored是之前的每个代币共（A+B个）获取的奖励
+    //  earned(account)为_balances[account]（我上次抵押的代币数量A+B）X （rewardPerTokenStored（此时的reward是含有上一阶段的;PS add）-上一阶段rewardPerTokenStored)+rewards[account](这是上一阶段的奖励)
+    //更新userRewardPerTokenPaid[account]
+
     function getRewardForDuration() external view returns (uint256) {
         return rewardRate.mul(rewardsDuration);//rewardRate*rewardsDuration（抵押时间60days）
     }
@@ -142,25 +162,7 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
         emit RewardAdded(reward);
     }
 
-    /* ========== MODIFIERS ========== */
-
-    modifier updateReward(address account) {//更新挖矿奖励的 modifer
-        rewardPerTokenStored = rewardPerToken();//获取每单位质押代币的奖励数量（截止到当前时间点）
-        lastUpdateTime = lastTimeRewardApplicable();//从当前区块时间和挖矿结束时间两者中返回最小值 挖矿结束后，lastUpdateTime 也会一直等于挖矿结束时间，这点很关键
-        if (account != address(0)) {
-            rewards[account] = earned(account);//计算上一阶段 获取的奖励
-            userRewardPerTokenPaid[account] = rewardPerTokenStored;//记录是上一阶段 每单位质押代币的奖励数量
-        }
-        _;
-    }//lastUpdateTime 第一次更新时 为工厂合约包奖励代币发放给抵押合约时 此时抵押合约正式开工
-    //第一次抵押时 A个 rewardPerTokenStored==0 ;earned(account)==0;抵押前触发modifier 此时_balances[account]为0
-    //第二次抵押时 B个 计算之前每个代币抵押的收益 rewardPerTokenStored是之前的每个代币（共A个）获取的奖励
-    //  earned(account)为_balances[account]（我上次抵押的代币数量A）X rewardPerTokenStored（这里等于rewardPerTokenStored.add(0)）
-    // rewardPerTokenStored 为   时间差x速率/质押代币总量 A                                                                                                                        
-    //  后将收益记录放入rewards[account]; rewardPerTokenStored也更新到 userRewardPerTokenPaid[account]
-    //第三次抵押时 计算之前每个代币抵押的收益 rewardPerTokenStored是之前的每个代币共（A+B个）获取的奖励
-    //  earned(account)为_balances[account]（我上次抵押的代币数量A+B）X （rewardPerTokenStored（此时的reward是含有上一阶段的;PS add）-上一阶段rewardPerTokenStored)+rewards[account](这是上一阶段的奖励)
-    //更新userRewardPerTokenPaid[account]
+   
     /* ========== EVENTS ========== */
 
     event RewardAdded(uint256 reward);

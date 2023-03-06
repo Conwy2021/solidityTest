@@ -1424,7 +1424,7 @@ contract MasterChef is Ownable {
     }
 
     // The SUSHI TOKEN!
-    SushiToken public sushi;
+    SushiToken public sushi;//sushui 代币地址
     // Dev address.
     address public devaddr;
     // Block number when bonus SUSHI period ends.
@@ -1556,10 +1556,10 @@ contract MasterChef is Ownable {
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);//得出有收益的区块个数
-        uint256 sushiReward = multiplier.mul(sushiPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+        uint256 sushiReward = multiplier.mul(sushiPerBlock).mul(pool.allocPoint).div(totalAllocPoint);//allocPoint 当前池子占总池子的比例  每块给100奖励币 是分给多个池子的
         sushi.mint(devaddr, sushiReward.div(10));//给项目方10%
         sushi.mint(address(this), sushiReward);//剩下的给这合约
-        pool.accSushiPerShare = pool.accSushiPerShare.add(sushiReward.mul(1e12).div(lpSupply));//sushi代币数量/每lptoken的累加
+        pool.accSushiPerShare = pool.accSushiPerShare.add(sushiReward.mul(1e12).div(lpSupply));//每lptoken奖励sushi代币数量的累加 关键记录
         pool.lastRewardBlock = block.number;
     }
 
