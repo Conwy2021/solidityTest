@@ -1,0 +1,2 @@
+onFlashLoan函数中 调用本合约deposit函数 获取大量LPtoken
+调用deposit的过程，使用的变量是收到闪电贷影响之后的数据

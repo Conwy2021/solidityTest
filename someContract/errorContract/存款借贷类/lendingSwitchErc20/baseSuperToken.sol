@@ -94,7 +94,7 @@ abstract contract baseSuperToken is timeLockSetting,superTokenInterface,proxyOwn
         else {
             uint256 what = _amount.mul(totalShares)/totaStake;//根据投入的amount数量 返回需要铸造的流动性代币
             require(what>0,"super token mint 0!");
-            _mint(receiver, what);//然后 LSWUSDC 再铸造自己的代币给用法
+            _mint(receiver, what);//然后 LSWUSDC 再铸造自己的代币给用户
             return what;
         }
     }
@@ -174,7 +174,7 @@ abstract contract baseSuperToken is timeLockSetting,superTokenInterface,proxyOwn
         uint256 fee = flashFee(token, amount);
         onWithdraw(address(receiver),amount);
         require(
-            receiver.onFlashLoan(msg.sender, token, amount, fee, data) == _RETURN_VALUE,
+            receiver.onFlashLoan(msg.sender, token, amount, fee, data) == _RETURN_VALUE,// conwy 这里重入了deposit
             "invalid return value"
         );
         onDeposit(address(receiver),amount + fee,0);

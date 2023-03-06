@@ -486,7 +486,9 @@ remixd -s D:\work\Project\多签地址代码\safe-contracts-main\safe-contracts-
 
 remix 编译文件过大时 在Advanced Configurations 中勾选Enable optimization
 --多签合约相关--
-https://app.safe.global/welcome  官方网址 可以链接测试网进行测试 
+https://app.safe.global/welcome  官方网址 可以链接测试网进行测试  一般合约叫GnosisSafeProxy 一般看到的交易是最后一个签名人同意后会发起交易 签名人——> 多签合约（次合约账户就是自己注册的地址）
+
+多钱合约可以一次交易 执行多笔 函数调用
 
 --罗技键盘 快捷键--
 Home键： Fn + 左方向键. End键： Fn + 右方向键 PageUP键： Fn + 上方向键 PageDown键： Fn + 下方向键.

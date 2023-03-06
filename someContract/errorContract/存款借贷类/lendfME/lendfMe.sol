@@ -1545,7 +1545,7 @@ contract MoneyMarket is Exponential, SafeToken {
         }
 
         // We calculate the protocol's totalSupply by subtracting the user's prior checkpointed balance, adding user's updated supply
-        (err, localResults.newTotalSupply) = addThenSub(market.totalSupply, localResults.userSupplyUpdated, balance.principal);//a+b-c
+        (err, localResults.newTotalSupply) = addThenSub(market.totalSupply, localResults.userSupplyUpdated, balance.principal);//a+b-c 这里临时保存我应有存款 后面重入提取函数 没有更新此数据
         if (err != Error.NO_ERROR) {// 第一次 totalSupply 为0  newTotalSupply 为10**18
             return fail(err, FailureInfo.SUPPLY_NEW_TOTAL_SUPPLY_CALCULATION_FAILED);
         }
