@@ -72,6 +72,7 @@ contract TimelockController is AccessControl, IERC721Receiver, IERC1155Receiver 
      * deployer. After configuration is done, it is recommended that the
      * deployer renounces its admin position and relies on timelocked
      * operations to perform future maintenance.
+     dao 合约项目 把timeController 作为
      */
     constructor(
         uint256 minDelay, // conwy 执行提案前 需要等待的是时间 按秒算的 
@@ -211,7 +212,7 @@ contract TimelockController is AccessControl, IERC721Receiver, IERC1155Receiver 
      *
      * - the caller must have the 'proposer' role.
      */
-    function schedule(
+    function schedule(//把提案放到计划列表里
         address target,
         uint256 value,
         bytes calldata data,
@@ -349,7 +350,7 @@ contract TimelockController is AccessControl, IERC721Receiver, IERC1155Receiver 
      * @dev Checks before execution of an operation's calls.
      */
     function _beforeCall(bytes32 id, bytes32 predecessor) private view {
-        require(isOperationReady(id), "TimelockController: operation is not ready");
+        require(isOperationReady(id), "TimelockController: operation is not ready");// 这里判断时间延迟是否满足
         require(predecessor == bytes32(0) || isOperationDone(predecessor), "TimelockController: missing dependency");
     }
 
