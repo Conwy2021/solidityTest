@@ -20,7 +20,7 @@ import "../../vendor/compound/ICompoundTimelock.sol";
  *
  * _Available since v4.3._
  */
-abstract contract GovernorTimelockCompound is IGovernorTimelock, Governor {
+abstract contract GovernorTimelockCompound is IGovernorTimelock, Governor {// 这个使用的是compound的时间锁合约 大致这个模板是模式compound的
     using SafeCast for uint256;
     using Timers for Timers.Timestamp;
 

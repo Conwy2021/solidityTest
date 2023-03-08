@@ -1,0 +1,3 @@
+真正正确使用时间锁合约 和 管理和的代码是GovernorTimelockControl.sol
+
+入口都是Governor合约 然后后面都是TimelockControl 在执行 。 TimelockControl 设置成合约的权限人

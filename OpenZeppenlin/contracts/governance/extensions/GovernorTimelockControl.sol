@@ -23,7 +23,7 @@ import "../TimelockController.sol";
  *
  * _Available since v4.3._
  */
-abstract contract GovernorTimelockControl is IGovernorTimelock, Governor {
+abstract contract GovernorTimelockControl is IGovernorTimelock, Governor {// conwy 这个合约才是真正的 和timeControl配合的合约
     TimelockController private _timelock; //使用TimelockController 合约中的函数
     mapping(uint256 => bytes32) private _timelockIds;
 
