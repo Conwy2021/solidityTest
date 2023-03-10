@@ -701,7 +701,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
 }
 
 
-contract SafeMoon is Context, IERC20, Ownable {
+contract SafeMoon is Context, IERC20, Ownable {// begin
     using SafeMath for uint256;
     using Address for address;
 

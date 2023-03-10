@@ -21,8 +21,8 @@ library UniswapV2Library {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // init code hash 这个是 keccak256(type(Pair).creationCode) 返回的
-            ))));
+                hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // init code hash 这个是 keccak256(type(Pair).creationCode) 返回的 坑 这个值会因为环境 会变化
+            ))));// 在pair 目录中 已放置计算合约 记得修改稿
     }
 
     // fetches and sorts the reserves for a pair
