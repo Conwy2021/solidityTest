@@ -759,7 +759,7 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
         uint oErr;
 
         // For each asset the account is in
-        CToken[] memory assets = accountAssets[account];
+        CToken[] memory assets = accountAssets[account];//记录用户参与的资产，不区分存款和借款
         
         for (uint i = 0; i < assets.length; i++) {
             CToken asset = assets[i];

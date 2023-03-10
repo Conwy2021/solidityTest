@@ -1394,7 +1394,7 @@ interface IMigratorChef {
 // distributed and the community can show to govern itself.
 //
 // Have fun reading it. Hopefully it's bug-free. God bless.
-contract MasterChef is Ownable {
+contract MasterChef is Ownable {// conwy  begin
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -1418,7 +1418,7 @@ contract MasterChef is Ownable {
     // Info of each pool.
     struct PoolInfo {
         IERC20 lpToken;           // Address of LP token contract.
-        uint256 allocPoint;       // How many allocation points assigned to this pool. SUSHIs to distribute per block.
+        uint256 allocPoint;       // How many allocation points assigned to this pool. SUSHIs to distribute per block. 每个池子能分多少比例的奖励
         uint256 lastRewardBlock;  // Last block number that SUSHIs distribution occurs.
         uint256 accSushiPerShare; // Accumulated SUSHIs per share, times 1e12. See below.
     }

@@ -1,0 +1,32 @@
+攻击地址 
+Tender.Fi Exploiter
+https://arbiscan.io/address/0x896df3759205c141c97640b2b7345fa479feb1ab
+
+
+0x
+it looks like yo
+7572206F7261636C6520776173206D69
+73636F6E666967757265642E20636F6E
+74616374206D6520746F20736F727420
+74686973206F7574
+
+0x
+6974206c6f6f6b73206c696b6520796f
+7572206f7261636c6520776173206d69
+73636f6e666967757265642e20636f6e
+74616374206d6520746f20736f727420
+74686973206f7574
+
+
+白帽 将62.15 ETH（价值$97107）转走作为，其余借贷资金已偿还，62.15 ETH资金目前留在0xD724a36b813a6e3592e6C03DdE906DA711203769地址
+
+GMXPriceOracle  问题函数 getUnderlyingPrice
+
+GMXPriceOracle  问题函数 getUnderlyingPrice
+之前问题合约地址GMXPriceOracle.sol 0x614157925d4b6f7396cde6434998bfd04789272d
+修改后地址 0x626fee808a206df7529b5ab7e5a6e8fc98509cea （改回原来的了）
+Tender.Fi项目 项目升级预言机合约，新的预言机合约中存在算法问题，导致可以超额借贷。
+白帽先抵押GMX，根据抵押GMX的价格，后续再进行借贷。在计算可以借贷金额时出现问题。在获取抵押品GMX价格时，再乘以10**10后，又进行乘以10**20操作（错误点），导致抵押价值异常放大。然后根据错误的抵押价值，再进行借贷。
+
+
+gmxTokenPriceOracle 地址 0x60E07B25Ba79bf8D40831cdbDA60CF49571c7Ee0
