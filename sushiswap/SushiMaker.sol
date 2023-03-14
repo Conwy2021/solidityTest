@@ -14,7 +14,7 @@ import "./Ownable.sol";
 // SushiMaker is MasterChef's left hand and kinda a wizard. He can cook up Sushi from pretty much anything!
 // This contract handles "serving up" rewards for xSushi holders by trading tokens collected from fees for Sushi.
 
-// T1 - T4: OK
+// T1 - T4: OK SushiMaker合约的作用转换Token为SUSHI并发送到SushiBar
 contract SushiMaker is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -60,7 +60,7 @@ contract SushiMaker is Ownable {
     }
 
     // F1 - F10: OK
-    // C1 - C24: OK
+    // C1 - C24: OK用于检索换取某种token的桥梁
     function bridgeFor(address token) public view returns (address bridge) {
         bridge = _bridges[token];
         if (bridge == address(0)) {
@@ -124,13 +124,13 @@ contract SushiMaker is Ownable {
         require(address(pair) != address(0), "SushiMaker: Invalid pair");
         // balanceOf: S1 - S4: OK
         // transfer: X1 - X5: OK
-        IERC20(address(pair)).safeTransfer(
+        IERC20(address(pair)).safeTransfer(//将属于自己的lp 转给pair 合约 
             address(pair),
             pair.balanceOf(address(this))
         );
         // X1 - X5: OK
-        (uint256 amount0, uint256 amount1) = pair.burn(address(this));
-        if (token0 != pair.token0()) {
+        (uint256 amount0, uint256 amount1) = pair.burn(address(this));// 然后销毁lp 获取原有代币
+        if (token0 != pair.token0()) {// token0 与 amount0 对应 token1 与amount1对应
             (amount0, amount1) = (amount1, amount0);
         }
         emit LogConvert(
@@ -146,7 +146,7 @@ contract SushiMaker is Ownable {
     // F1 - F10: OK
     // C1 - C24: OK
     // All safeTransfer, _swap, _toSUSHI, _convertStep: X1 - X5: OK
-    function _convertStep(
+    function _convertStep(// 大致是 所有奖励LP都兑换成sushi 转给bar
         address token0,
         address token1,
         uint256 amount0,
@@ -158,10 +158,10 @@ contract SushiMaker is Ownable {
             if (token0 == sushi) {
                 IERC20(sushi).safeTransfer(bar, amount);
                 sushiOut = amount;
-            } else if (token0 == weth) {
+            } else if (token0 == weth) {//weth 兑换 sushi
                 sushiOut = _toSUSHI(weth, amount);
             } else {
-                address bridge = bridgeFor(token0);
+                address bridge = bridgeFor(token0);//查询此代币兑换哪种代币
                 amount = _swap(token0, bridge, amount, address(this));
                 sushiOut = _convertStep(bridge, bridge, amount, 0);
             }
@@ -235,30 +235,30 @@ contract SushiMaker is Ownable {
         // X1 - X5: OK
         (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
         uint256 amountInWithFee = amountIn.mul(997);
-        if (fromToken == pair.token0()) {
+        if (fromToken == pair.token0()) {// 进token0 - 出sushi
             amountOut =
                 amountInWithFee.mul(reserve1) /
-                reserve0.mul(1000).add(amountInWithFee);
+                reserve0.mul(1000).add(amountInWithFee);//已知amountIn 求amountOut
             IERC20(fromToken).safeTransfer(address(pair), amountIn);
-            pair.swap(0, amountOut, to, new bytes(0));
+            pair.swap(0, amountOut, to, new bytes(0));//兑换出 token1
             // TODO: Add maximum slippage?
-        } else {
+        } else {                        // 出sushi - 进token1
             amountOut =
                 amountInWithFee.mul(reserve0) /
                 reserve1.mul(1000).add(amountInWithFee);
             IERC20(fromToken).safeTransfer(address(pair), amountIn);
-            pair.swap(amountOut, 0, to, new bytes(0));
+            pair.swap(amountOut, 0, to, new bytes(0));//兑换出 token0
             // TODO: Add maximum slippage?
-        }
+        }// 这一步 就是要兑换出 sushi 
     }
 
     // F1 - F10: OK
     // C1 - C24: OK
-    function _toSUSHI(address token, uint256 amountIn)
+    function _toSUSHI(address token, uint256 amountIn)// 将其他代币转换为sushi 转给bar 合约
         internal
         returns (uint256 amountOut)
     {
         // X1 - X5: OK
-        amountOut = _swap(token, sushi, amountIn, bar);
+        amountOut = _swap(token, sushi, amountIn, bar);// sushi地址是写好的
     }
 }

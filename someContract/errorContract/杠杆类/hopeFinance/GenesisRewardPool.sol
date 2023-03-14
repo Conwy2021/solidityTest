@@ -49,12 +49,12 @@ contract GenesisRewardPool is ReentrancyGuard{
 
     // Info of each pool.
     struct PoolInfo {
-        IERC20 token; // Address of LP token contract.
+        IERC20 token; // Address of LP token contract. 这不是LP 呀  它存的是weth 或者是usdc
         uint256 allocPoint; // How many allocation points assigned to this pool. HOPE to distribute.
         uint256 lastRewardTime; // Last time that HOPE distribution occurs.
         uint256 accRewardPerShare; // Accumulated HOPE per share, times 1e18. See below.
         bool isStarted; // if lastRewardBlock has passed
-        uint256 depositFeeBP;
+        uint256 depositFeeBP;// 存款手续费
         uint256 minAmountFortrading;
         uint256 totalDepositAmount;
     }
@@ -112,7 +112,7 @@ contract GenesisRewardPool is ReentrancyGuard{
     mapping(uint256 => Trade) public trades;
     mapping(uint256 => TradeInfo) public tradeInfos;
 
-    uint256 public feeDenominator = 10000;// 押金分母
+    uint256 public feeDenominator = 10000;// 费率分母
     uint256 public tradeCount = 0;
     ITradingHelper public tradingHelper;
     IReferalHelper public referalHelper;
@@ -123,7 +123,7 @@ contract GenesisRewardPool is ReentrancyGuard{
     event RewardPaid(address indexed user, uint256 amount);
 
     constructor(
-        address _hope,//0xb43f563956fdfdb948cd76a55da267042fa6c805 
+        address _hope,//0xb43f563956fdfdb948cd76a55da267042fa6c805 抵押lp奖励的币种
         address _dao,//0x8ebd0574d37d77bdda1a40cdf3289c9770309aa7  多签钱包
         uint256 _poolStartTime,
         address _tradingHelper,//0x56d3b49e934905a1946b31dbd756714cd844ec5e
@@ -189,7 +189,7 @@ contract GenesisRewardPool is ReentrancyGuard{
             lastRewardTime : _lastRewardTime,
             accRewardPerShare : 0,
             isStarted : _isStarted,
-            depositFeeBP: _depositFeeBP, //押金
+            depositFeeBP: _depositFeeBP, //存款手续费
             minAmountFortrading: _minAmountFortrading,//最低交易金额
             totalDepositAmount: 0
             }));
@@ -267,55 +267,55 @@ contract GenesisRewardPool is ReentrancyGuard{
         if (totalAllocPoint > 0) {
             uint256 _generatedReward = getGeneratedReward(pool.lastRewardTime, block.timestamp);
             uint256 _hopeReward = _generatedReward.mul(pool.allocPoint).div(totalAllocPoint);
-            pool.accRewardPerShare = pool.accRewardPerShare.add(_hopeReward.mul(1e18).div(tokenSupply));//记录每秒奖励的累加量
+            pool.accRewardPerShare = pool.accRewardPerShare.add(_hopeReward.mul(1e18).div(tokenSupply));//记录每秒奖励的累加量，在每次tokenSupply会变化时。
         }
         pool.lastRewardTime = block.timestamp;//更新 最后计算的时间至pool 
     }
 
     // Deposit LP tokens.
-    function deposit(uint256 _pid, uint256 _amount, address _referrer) external nonReentrant {
+    function deposit(uint256 _pid, uint256 _amount, address _referrer) external nonReentrant {// 存的是weth 或usdc
         address _sender = msg.sender;
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_sender];
         updatePool(_pid);
-        if (user.amount > 0) {
+        if (user.amount > 0) {// 结算用户奖励 发送奖励
             uint256 _pending = user.amount.mul(pool.accRewardPerShare).div(1e18).sub(user.rewardDebt);
             if (_pending > 0) {
-                safeRewardTransfer(_sender, _pending);
+                safeRewardTransfer(_sender, _pending);// 奖励hope 代币
                 emit RewardPaid(_sender, _pending);
             }
         }
         if (_amount > 0) {
-            pool.token.safeTransferFrom(_sender, address(this), _amount);
+            pool.token.safeTransferFrom(_sender, address(this), _amount);//pool.token LP代币地址 用户转钱到合约
             user.amount = user.amount.add(_amount);
             pool.totalDepositAmount = pool.totalDepositAmount.add(_amount);
-            if(pool.depositFeeBP > 0){
+            if(pool.depositFeeBP > 0){// 有扣除费率 则扣除 depositFeeBP=100
                 uint256 depositFee = _amount.mul(pool.depositFeeBP).div(feeDenominator);
                 user.amount = user.amount.sub(depositFee);
                 pool.totalDepositAmount = pool.totalDepositAmount.sub(depositFee);
 
-                if(_amount >= pool.minAmountFortrading && _referrer != address(0) && _referrer != msg.sender) {
+                if(_amount >= pool.minAmountFortrading && _referrer != address(0) && _referrer != msg.sender) {// minAmountFortrading 存款金额到达额度 要将扣除的LP 兑换成 
 
-                    uint256 referFee = depositFee.div(2);
-                    pool.token.safeTransfer(_referrer, referFee);
+                    uint256 referFee = depositFee.div(2);// 每次兑换一半
+                    pool.token.safeTransfer(_referrer, referFee);// 一半给推荐人
 
                     if(_pid == 0) {
-                        referalHelper.addReferWETHAmount(msg.sender, _referrer, address(pool.token), referFee);
+                        referalHelper.addReferWETHAmount(msg.sender, _referrer, address(pool.token), referFee);// 貌似是 记录推荐人的一些信息 分红次数和金额
                     } else {
                         referalHelper.addReferUSDCAmount(msg.sender, _referrer, address(pool.token), referFee);
                     }
                     depositFee = depositFee.sub(referFee);
                 }
-                pool.token.safeTransfer(daoAddress, depositFee);
+                pool.token.safeTransfer(daoAddress, depositFee); //剩下的Lp 转给dao合约 
             }
         }
 
-        user.rewardDebt = user.amount.mul(pool.accRewardPerShare).div(1e18);
+        user.rewardDebt = user.amount.mul(pool.accRewardPerShare).div(1e18);// 记录存储时 之前所有的单位时间内的累加和
         emit Deposit(_sender, _pid, _amount);
     }
 
     // Withdraw LP tokens.
-    function withdraw(uint256 _pid, uint256 _amount) external nonReentrant {
+    function withdraw(uint256 _pid, uint256 _amount) external nonReentrant {// 提取抵押的weth 或者usdc hope 就是存款奖励 不需要偿还
         address _sender = msg.sender;
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_sender];
@@ -324,13 +324,13 @@ contract GenesisRewardPool is ReentrancyGuard{
         updatePool(_pid);
         uint256 _pending = user.amount.mul(pool.accRewardPerShare).div(1e18).sub(user.rewardDebt);
         if (_pending > 0) {
-            safeRewardTransfer(_sender, _pending);
+            safeRewardTransfer(_sender, _pending);//发送奖励代币hope
             emit RewardPaid(_sender, _pending);
         }
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
-            pool.totalDepositAmount = pool.totalDepositAmount.sub(_amount);
-            pool.token.safeTransfer(_sender, _amount);
+            pool.totalDepositAmount = pool.totalDepossitAmount.sub(_amount);
+            pool.token.safeTransfer(_sender, _amount);// 提取之前的存入的金额
         }
         user.rewardDebt = user.amount.mul(pool.accRewardPerShare).div(1e18);
         emit Withdraw(_sender, _pid, _amount);
@@ -347,7 +347,7 @@ contract GenesisRewardPool is ReentrancyGuard{
         user.amount = 0;
         user.rewardDebt = 0;
         pool.totalDepositAmount = pool.totalDepositAmount.sub(_amount);
-        pool.token.safeTransfer(msg.sender, _amount);
+        pool.token.safeTransfer(msg.sender, _amount); // 转weth 或者 usdc代币
         emit EmergencyWithdraw(msg.sender, _pid, _amount);
     }
 
@@ -388,7 +388,7 @@ contract GenesisRewardPool is ReentrancyGuard{
         IERC20(_token).safeTransfer(msg.sender, getAmount);
     }
 
-    function withdrawTradingFee(uint256 _pid) external {
+    function withdrawTradingFee(uint256 _pid) external {// dao 合约提取交易费
         require(msg.sender == daoAddress, "withdrawTradingFee: FORBIDDEN");
         require(_pid < 2, "wrong pid");
         PoolInfo storage pool = poolInfo[_pid];
@@ -409,7 +409,7 @@ contract GenesisRewardPool is ReentrancyGuard{
                 PoolInfo storage pool = poolInfo[pid];
                 require(_token != pool.token, "pool.token");
             }
-        }
+        }// 提取其他代币 和项目无关的 防止误打入
         _token.safeTransfer(to, amount);
     }
 
@@ -423,19 +423,19 @@ contract GenesisRewardPool is ReentrancyGuard{
         referalHelper = IReferalHelper(_referalHelper);
     }
 
-    function openTrade(uint256 _pid, uint256 _borrowAmount, uint256 _limitPrice) external nonReentrant {
-        require(block.timestamp < poolEndTime.sub(1 hours), "leverage trading is disabled");
+    function openTrade(uint256 _pid, uint256 _borrowAmount, uint256 _limitPrice) external nonReentrant {//把
+        require(block.timestamp < poolEndTime.sub(1 hours), "leverage trading is disabled");//杠杆交易被禁用
         address _trader = msg.sender;
         // _pid = 0: weth pool, _pid = 1: usdc pool
-        // _pid = 0 ? short : long
+        // _pid = 0 ? short : long 做空 做多 
         require(_pid < 2, "wrong pool id");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_trader];
         TradeInfo storage tradeInfo = tradeInfos[_pid];
 
         require(!user.isTrading, "already started one trading");
-        require(user.amount.mul(feeDenominator).div(feeDenominator.sub(pool.depositFeeBP)) >= pool.minAmountFortrading, "need to deposit min amount for trading");
-        require(user.amount.mul(tradingHelper.getMaxMultiplier(_pid)) >= _borrowAmount, "exceed max multiplier");
+        require(user.amount.mul(feeDenominator).div(feeDenominator.sub(pool.depositFeeBP)) >= pool.minAmountFortrading, "need to deposit min amount for trading");//用户实际存的钱（现有的钱*(10/9）)
+        require(user.amount.mul(tradingHelper.getMaxMultiplier(_pid)) >= _borrowAmount, "exceed max multiplier");// 可以借5倍数量？？
         
         uint256 borrowableAmount = getBorrowableAmount(_pid);
         require(_borrowAmount <= borrowableAmount, "wrong borrow amount for trade");
@@ -443,24 +443,24 @@ contract GenesisRewardPool is ReentrancyGuard{
 
         tradeInfo.totalBorrowedAmount = tradeInfo.totalBorrowedAmount.add(_borrowAmount);
 
-        uint256 swappedAmount = 0;
+        uint256 swappedAmount = 0;//兑换金额
         uint256 liqPrice = 0;
 
         pool.token.safeIncreaseAllowance(address(tradingHelper), _borrowAmount);
-        if(_pid == 1) {
-            swappedAmount = tradingHelper.SwapToWETH(_borrowAmount);
+        if(_pid == 1) {// usdc 
+            swappedAmount = tradingHelper.SwapToWETH(_borrowAmount);// usdc 兑换weth
             liqPrice = _borrowAmount.sub(user.amount).mul(1e14).div(swappedAmount);
             liqPrice = liqPrice.mul(105).div(100);
-        } else {
-            swappedAmount = tradingHelper.SwapWETH(_borrowAmount);
+        } else {// weth
+            swappedAmount = tradingHelper.SwapWETH(_borrowAmount); //weth 兑换 usdc 兑换到本合约中
             liqPrice = swappedAmount.mul(1e14).div(_borrowAmount.sub(user.amount));
-            liqPrice = liqPrice.mul(95).div(100);
+            liqPrice = liqPrice.mul(95).div(100);// 不清楚此数据 作用
         }
 
-        uint256 startPrice = tradingHelper.getETHprice();
+        uint256 startPrice = tradingHelper.getETHprice();//放大14精度 后的usdc/weth
         
         user.isTrading = true;
-        user.currentTradeId = tradeCount;
+        user.currentTradeId = tradeCount;//全局变量 初始为0 
         trades[tradeCount] = Trade(
             tradeCount,
             msg.sender,
@@ -488,11 +488,11 @@ contract GenesisRewardPool is ReentrancyGuard{
         return available >= maxAmount ? maxAmount : available;
     }
 
-    function getEstLiqudationPrice(uint256 _pid, uint256 _borrowAmount, uint256 _collateralAmount) public view returns(uint256) {
+    function getEstLiqudationPrice(uint256 _pid, uint256 _borrowAmount, uint256 _collateralAmount) public view returns(uint256) {//？获取强平价格
         uint256 estimateSwapAmount = 0;
         require(_borrowAmount >= _collateralAmount, "wrong borrow amount");
         if(_pid == 0) {
-            estimateSwapAmount = tradingHelper.getEstimateUSDC(_borrowAmount);
+            estimateSwapAmount = tradingHelper.getEstimateUSDC(_borrowAmount);// 查询weth  兑换多少usdc
             return estimateSwapAmount.mul(1e14).div(_borrowAmount.sub(_collateralAmount));
         } else {
             estimateSwapAmount = tradingHelper.getEstimateWETH(_borrowAmount);
@@ -507,7 +507,7 @@ contract GenesisRewardPool is ReentrancyGuard{
             endTime = block.timestamp;
         }
         uint256 fee = trade.borrowAmount.mul(endTime.sub(trade.startTime)).mul(tradingHelper.fundsBackTax()).div(1 days).div(feeDenominator);
-        return fee;
+        return fee;//fundsBackTax is users should pay 0.15% of borrow amount per day
     }
 
     function endTrade(uint256 _tradeId) public {
@@ -527,54 +527,54 @@ contract GenesisRewardPool is ReentrancyGuard{
 
         if(trade.pid == 1) {
             poolInfo[0].token.safeIncreaseAllowance(address(tradingHelper), trade.swappedAmount);
-            lastAmount = tradingHelper.SwapWETH(trade.swappedAmount);
+            lastAmount = tradingHelper.SwapWETH(trade.swappedAmount);//weth 兑换成 udsc
         } else {
             poolInfo[1].token.safeIncreaseAllowance(address(tradingHelper), trade.swappedAmount);
-            lastAmount = tradingHelper.SwapToWETH(trade.swappedAmount);
+            lastAmount = tradingHelper.SwapToWETH(trade.swappedAmount);//udsc 兑换成 weth
         }
 
         trade.returnAmount = lastAmount;
         trade.endPrice = tradingHelper.getETHprice();
         tradeInfo.totalReturnedAmount = tradeInfo.totalReturnedAmount.add(lastAmount);
 
-        updatePool(trade.pid);
+        updatePool(trade.pid);// 更新 奖励hope 的数据 hope 是根据时间一直在奖励的 计算出上次奖励到这次奖励区间 每个抵押的币 可以奖励hope代币
         uint256 _pending = user.amount.mul(pool.accRewardPerShare).div(1e18).sub(user.rewardDebt);
         if (_pending > 0) {
-            safeRewardTransfer(trade.user, _pending);
+            safeRewardTransfer(trade.user, _pending);//发送存款奖励代币
             emit RewardPaid(trade.user, _pending);
-        }
+        }//感觉这里更新奖励的计算 有点问题//  无问题 tokenSupply 是之前没变化前的 借贷偿还的钱 是不算在hope分红里的
 
-        uint256 borrowFee = getBorrowFee(_tradeId);
-        uint256 feeAmount = 0;
-        if(lastAmount >= trade.borrowAmount.add(borrowFee)) {
+        uint256 borrowFee = getBorrowFee(_tradeId);// 计算借款费用
+        uint256 feeAmount = 0; // 总的费用统计
+        if(lastAmount >= trade.borrowAmount.add(borrowFee)) {// weth杠杆做空 挣钱的钱 大于等于 借的钱加利息
             uint256 profit = lastAmount.sub(trade.borrowAmount).sub(borrowFee);
             tradeInfo.totalProfit = tradeInfo.totalProfit.add(profit);
-            uint256 profitFee = profit.mul(tradingHelper.profitTax()).div(feeDenominator);
-            profit = profit.sub(profitFee);
-            feeAmount = borrowFee.add(profitFee);
+            uint256 profitFee = profit.mul(tradingHelper.profitTax()).div(feeDenominator);//利润费用税
+            profit = profit.sub(profitFee);//
+            feeAmount = borrowFee.add(profitFee);// 总费用 借钱的费用加挣钱的税费
             if(profit > 0) {
-                user.amount = user.amount.add(profit);
+                user.amount = user.amount.add(profit);//在这里增加用户的利润
                 user.totalProfit += int256(profit);
                 trade.profit += int256(profit);
             }
-        } else {
+        } else {// 亏了 场景 lastAmount 小于 借贷额 加 借贷利息
             uint256 loss = 0;
-            if(lastAmount < trade.borrowAmount) {
-                loss = trade.borrowAmount.sub(lastAmount);
-                if(user.amount > loss) {
+            if(lastAmount < trade.borrowAmount) { //场景 lastAmount 小于 借贷额
+                loss = trade.borrowAmount.sub(lastAmount);// 亏的金额
+                if(user.amount > loss) {// 亏的金额 小于用户的本金
                     user.amount = user.amount.sub(loss);
                     if(user.amount > borrowFee) {
                         user.amount = user.amount.sub(borrowFee);
-                        feeAmount = borrowFee;
+                        feeAmount = borrowFee;// 费用只有借贷费
                     } else {
-                        feeAmount = user.amount;
+                        feeAmount = user.amount;// 费用为用户的本金
                         user.amount = 0;
                     }
                 } else {
                     user.amount = 0;
                 }
                 loss = loss.add(borrowFee);
-            } else {
+            } else {// 场景 大于等于 借贷金额  小于借贷额 加 借贷利息
                 loss = trade.borrowAmount.add(borrowFee).sub(lastAmount);
                 if(user.amount > loss) {
                     user.amount = user.amount.sub(loss);
@@ -604,14 +604,14 @@ contract GenesisRewardPool is ReentrancyGuard{
         uint256 borrowFee = getBorrowFee(_tradeId);
         uint256 estimateAmount = 0;
 
-        if(trade.pid == 0) {
-            estimateAmount = tradingHelper.getEstimateWETH(trade.swappedAmount);
+        if(trade.pid == 0) {// estimateAmount 是weth 数量  预估金额 usdc 能转换为多少weth  是5倍杠杆后的
+            estimateAmount = tradingHelper.getEstimateWETH(trade.swappedAmount);//trade.swappedAmount 是usdc 之前借款使用weth 借的
         } else {
             estimateAmount = tradingHelper.getEstimateUSDC(trade.swappedAmount);
         }
-
+        //estimateAmount 当前时间下  50usdc 可以兑换的 weth |  trade.borrowAmount 当时借的weth的数量 为5 + 借款费用 - 用户的本金1
         if(estimateAmount.mul(95).div(100) <= trade.borrowAmount.add(borrowFee).sub(user.amount)){
-            return true;
+            return true; // 本金亏没了 应该结算？
         } else {
             if(trade.limitPrice == 0) {
                 return false;
@@ -619,7 +619,7 @@ contract GenesisRewardPool is ReentrancyGuard{
                 if(trade.pid == 1) {
                     return trade.limitPrice <= tradingHelper.getETHprice();
                 } else {
-                    return trade.limitPrice >= tradingHelper.getETHprice();
+                    return trade.limitPrice >= tradingHelper.getETHprice();// 限价？ eth低于多少价值后 都认为要结算？
                 }
             }
         }

@@ -1426,7 +1426,7 @@ contract MasterChef is Ownable {// conwy  begin
     // The SUSHI TOKEN!
     SushiToken public sushi;//sushui 代币地址
     // Dev address.
-    address public devaddr;
+    address public devaddr;// 项目方地址
     // Block number when bonus SUSHI period ends.
     uint256 public bonusEndBlock;
     // SUSHI tokens created per block.
@@ -1533,7 +1533,7 @@ contract MasterChef is Ownable {// conwy  begin
             uint256 sushiReward = multiplier.mul(sushiPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
             accSushiPerShare = accSushiPerShare.add(sushiReward.mul(1e12).div(lpSupply));
         }
-        return user.amount.mul(accSushiPerShare).div(1e12).sub(user.rewardDebt);
+        return user.amount.mul(accSushiPerShare).div(1e12).sub(user.rewardDebt);//rewardDebt 是用户抵押时 池子之前的每个单位奖励的积累量
     }
 
     // Update reward vairables for all pools. Be careful of gas spending!

@@ -30,14 +30,14 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     }
 
     // **** ADD LIQUIDITY ****
-    function _addLiquidity(
+    function _addLiquidity(//计算按比例投入时 需要的Ａ和B　因为在投入时　有人兑换会影响池子的比例
         address tokenA,
         address tokenB,
         uint amountADesired,
         uint amountBDesired,
         uint amountAMin,
         uint amountBMin
-    ) internal virtual returns (uint amountA, uint amountB) {//这一步 限制转入的代币a 和代币b 的比值 要比池子的比例大才行 
+    ) internal virtual returns (uint amountA, uint amountB) {//这一步 限制转入的代币a 和代币b 的比值 要按池子比例添加 
         // create the pair if it doesn't exist yet
         if (IUniswapV2Factory(factory).getPair(tokenA, tokenB) == address(0)) {
             IUniswapV2Factory(factory).createPair(tokenA, tokenB);
@@ -49,12 +49,12 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             uint amountBOptimal = UniswapV2Library.quote(amountADesired, reserveA, reserveB);
             if (amountBOptimal <= amountBDesired) {
                 require(amountBOptimal >= amountBMin, 'UniswapV2Router: INSUFFICIENT_B_AMOUNT');
-                (amountA, amountB) = (amountADesired, amountBOptimal);
+                (amountA, amountB) = (amountADesired, amountBOptimal);// 投入我填写的A 和 合适的B
             } else {
                 uint amountAOptimal = UniswapV2Library.quote(amountBDesired, reserveB, reserveA);
                 assert(amountAOptimal <= amountADesired);
                 require(amountAOptimal >= amountAMin, 'UniswapV2Router: INSUFFICIENT_A_AMOUNT');
-                (amountA, amountB) = (amountAOptimal, amountBDesired);
+                (amountA, amountB) = (amountAOptimal, amountBDesired);// 投入合适的A 和 我填写的B
             }
         }
     }
@@ -221,7 +221,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             );//amount1Out  转换后的代币数量 todo
         }
     }
-    function swapExactTokensForTokens(// 投入确切的数量 出多少
+    function swapExactTokensForTokens(// 投入确切的数量 出多少 exact 取决于你填的数量 在上面 还是下面  path 觉得兑换方向
         uint amountIn,
         uint amountOutMin,
         address[] calldata path,//path 放两个代币的地址 path的顺序决定了兑换的方向

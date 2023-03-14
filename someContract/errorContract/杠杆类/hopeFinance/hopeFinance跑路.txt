@@ -13,3 +13,11 @@ Beosin提醒用户：请勿在0x1FC2..E56c合约进行抵押操作，建议取�
 
 合约修改恶意地址 时间为 16 days 16 hrs ago (Feb-20-2023 05:26:50 PM +UTC)
 攻击时间
+
+0x82af49447d8a07e3bd95bd0d56f35241523fbab1 WETH 精度18
+0xb43f563956FDFdB948CD76A55DA267042Fa6c805 Hope 精度18
+0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8 USDC 精度 6
+
+业务逻辑
+用户将weth或者usdc 存在pool 合约 一次存款金额 如果超过一定金额 就触发分红逻辑 存款10%的手续费 
+然后可以以5倍限额 进行借贷 但是借贷的钱 是到pool合约的

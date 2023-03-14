@@ -55,8 +55,8 @@ contract TradingHelper is Ownable{
     uint256 constant feeDenominator = 10000;
 
     mapping(address => bool) public autoEnders;
-    mapping(uint256 => uint256) public maxBorrowAmount;
-    mapping(uint256 => uint256) public maxMultiplier;
+    mapping(uint256 => uint256) public maxBorrowAmount;// 最大借贷金额
+    mapping(uint256 => uint256) public maxMultiplier;// 最大借贷 系数 初始为5
     mapping(address => bool) public botBlackList;
     
     constructor(
@@ -127,11 +127,11 @@ contract TradingHelper is Ownable{
     }
 
     function getETHprice() public view returns (uint256) {
-        (uint Res0, uint Res1, ) = IUniswapV2Pair(uniswapV2Pair).getReserves();
-        if(pairInverse) {
+        (uint Res0, uint Res1, ) = IUniswapV2Pair(uniswapV2Pair).getReserves();//初始化时 是 weth 和usdc的池子
+        if(pairInverse) {// 是否对换 默认false
             return Res0.mul(1e14).div(Res1);
         } else {
-            return Res1.mul(1e14).div(Res0);
+            return Res1.mul(1e14).div(Res0);// usdc/weth
         }
     }
 
