@@ -427,7 +427,7 @@ contract GenesisRewardPool is ReentrancyGuard{
         require(block.timestamp < poolEndTime.sub(1 hours), "leverage trading is disabled");//杠杆交易被禁用
         address _trader = msg.sender;
         // _pid = 0: weth pool, _pid = 1: usdc pool
-        // _pid = 0 ? short : long 做空 做多 
+        // _pid = 0 ? short : long  0做空eth  1做多eth 做空某币就要持有某币对面方向的代币，做多就持有某币
         require(_pid < 2, "wrong pool id");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_trader];
@@ -487,14 +487,14 @@ contract GenesisRewardPool is ReentrancyGuard{
         uint256 maxAmount = tradingHelper.getMaxBorrowAmount(_pid);
         return available >= maxAmount ? maxAmount : available;
     }
-
+    // 价格波动的什么价格  就会亏完本金
     function getEstLiqudationPrice(uint256 _pid, uint256 _borrowAmount, uint256 _collateralAmount) public view returns(uint256) {//？获取强平价格
         uint256 estimateSwapAmount = 0;
-        require(_borrowAmount >= _collateralAmount, "wrong borrow amount");
-        if(_pid == 0) {
+        require(_borrowAmount >= _collateralAmount, "wrong borrow amount");//_borrowAmount 借的数量  _collateralAmount 抵押的数量
+        if(_pid == 0) {// 做空weth
             estimateSwapAmount = tradingHelper.getEstimateUSDC(_borrowAmount);// 查询weth  兑换多少usdc
             return estimateSwapAmount.mul(1e14).div(_borrowAmount.sub(_collateralAmount));
-        } else {
+        } else {// 做多weth
             estimateSwapAmount = tradingHelper.getEstimateWETH(_borrowAmount);
             return _borrowAmount.sub(_collateralAmount).mul(1e14).div(estimateSwapAmount);
         }
@@ -545,7 +545,7 @@ contract GenesisRewardPool is ReentrancyGuard{
         }//感觉这里更新奖励的计算 有点问题//  无问题 tokenSupply 是之前没变化前的 借贷偿还的钱 是不算在hope分红里的
 
         uint256 borrowFee = getBorrowFee(_tradeId);// 计算借款费用
-        uint256 feeAmount = 0; // 总的费用统计
+        uint256 feeAmount = 0; // 总的费用统计 也是pool 的盈利费用
         if(lastAmount >= trade.borrowAmount.add(borrowFee)) {// weth杠杆做空 挣钱的钱 大于等于 借的钱加利息
             uint256 profit = lastAmount.sub(trade.borrowAmount).sub(borrowFee);
             tradeInfo.totalProfit = tradeInfo.totalProfit.add(profit);

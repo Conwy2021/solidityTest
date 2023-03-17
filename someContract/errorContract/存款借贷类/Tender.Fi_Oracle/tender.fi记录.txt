@@ -28,5 +28,7 @@ GMXPriceOracle  问题函数 getUnderlyingPrice
 Tender.Fi项目 项目升级预言机合约，新的预言机合约中存在算法问题，导致可以超额借贷。
 白帽先抵押GMX，根据抵押GMX的价格，后续再进行借贷。在计算可以借贷金额时出现问题。在获取抵押品GMX价格时，再乘以10**10后，又进行乘以10**20操作（错误点），导致抵押价值异常放大。然后根据错误的抵押价值，再进行借贷。
 
-
+临时使用老的预言机
 gmxTokenPriceOracle 地址 0x60E07B25Ba79bf8D40831cdbDA60CF49571c7Ee0
+
+TenderPriceOracle 新的地址 0xa11BAde71dF9005f4Cfb6FfeCd266eD8046Fd5c6

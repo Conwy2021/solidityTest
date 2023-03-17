@@ -255,7 +255,7 @@ contract ComptrollerG7 is ComptrollerV5Storage, ComptrollerInterface, Comptrolle
         updateCompSupplyIndex(cToken);
         // 更新分配代币奖励
         distributeSupplierComp(cToken, minter);
-
+s
         return uint(Error.NO_ERROR);
     }
 
@@ -419,7 +419,7 @@ contract ComptrollerG7 is ComptrollerV5Storage, ComptrollerInterface, Comptrolle
             require(nextTotalBorrows < borrowCap, "market borrow cap reached");
         }
 
-        // 计算流动性
+        // 计算流动性 这里计算是否还能继续借款
         (Error err, , uint shortfall) = getHypotheticalAccountLiquidityInternal(borrower, CToken(cToken), 0, borrowAmount);
         console.log("shortfall", shortfall);
         if (err != Error.NO_ERROR) {

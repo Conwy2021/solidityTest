@@ -582,7 +582,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         accrualBlockNumber = currentBlockNumber;    //  当前区块
         borrowIndex = borrowIndexNew;       //  借款指数
         totalBorrows = totalBorrowsNew;     //  借款总量
-        totalReserves = totalReservesNew;   //  储备金总量
+        totalReserves = totalReservesNew;   //  储备金总量 
 
         /* We emit an AccrueInterest event */
         emit AccrueInterest(
@@ -619,7 +619,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         Error err;
         MathError mathErr;
         uint exchangeRateMantissa;  //  汇率
-        uint mintTokens;    //  mint tolen
+        uint mintTokens;    //  mint token
         uint totalSupplyNew;    //  token总数
         uint accountTokensNew;  //  用户最新token
         uint actualMintAmount;  //  实际铸造数量

@@ -208,7 +208,7 @@ contract GMXPriceOracle is PriceOracle {
         if(cToken.isGLP()){
             return glpManager.getAumInUsdg(true).mul(1e18).div(glpToken.totalSupply());   
         } else if(compareStrings(cToken.symbol(), "tGMX")){
-            return gmxTokenPriceOracle.getPriceInUSD().mul(1e10);
+            return gmxTokenPriceOracle.getPriceInUSD().mul(1e10);//正常的8精度获取价格 然后乘以10
         } else {
             IERC20 underlying = IERC20(_getUnderlyingAddress(cToken));
             uint256 decimals = underlying.decimals();

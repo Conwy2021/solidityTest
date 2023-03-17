@@ -131,7 +131,7 @@ contract CTokenStorage {
     /**
      * @notice 被扣押的抵押品的份额被添加到准备金中
      */
-    uint public constant protocolSeizeShareMantissa = 2.8e16; //2.8%
+    uint public constant protocolSeizeShareMantissa = 2.8e16; //2.8%  放大10^18 存储
 
 }
 
