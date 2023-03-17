@@ -2228,11 +2228,11 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         // 3. discountedBorrowDenominatedCollateral
         //      [supplyCurrent / (1 + liquidationDiscount)] * (Oracle price for the collateral / Oracle price for the borrow)
 
-        // Here we calculate item 3. discountedBorrowDenominatedCollateral =
+        // Here we calculate item 3. discountedBorrowDenominatedCollateral = 贴现借贷计抵押品
         // [supplyCurrent / (1 + liquidationDiscount)] * (Oracle price for the collateral / Oracle price for the borrow)
         (err, localResults.discountedBorrowDenominatedCollateral) =
         calculateDiscountedBorrowDenominatedCollateral(localResults.underwaterAssetPrice, localResults.collateralPrice, localResults.currentSupplyBalance_TargetCollateralAsset);
-        if (err != Error.NO_ERROR) {
+        if (err != Error.NO_ERROR) {//localResults.underwaterAssetPrice 借款现价
             return fail(err, FailureInfo.LIQUIDATE_BORROW_DENOMINATED_COLLATERAL_CALCULATION_FAILED);
         }
 
