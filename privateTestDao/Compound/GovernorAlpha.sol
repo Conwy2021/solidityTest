@@ -200,7 +200,7 @@ contract GovernorAlpha {
         emit ProposalExecuted(proposalId);
     }
 
-    function cancel(uint proposalId) public {
+    function cancel(uint proposalId) public {//监护人取消或者提案的提案人小于提案阈值满足  提案人 拥有的comp代币 变少了 变到比阈值小了
         ProposalState state = state(proposalId);
         require(state != ProposalState.Executed, "GovernorAlpha::cancel: cannot cancel executed proposal");
 
