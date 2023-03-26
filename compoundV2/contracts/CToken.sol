@@ -670,7 +670,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         *现金。
         */
         //  cToken 和cEth 不通方法实现
-        // 当前合约调用转帐到当前合约 并且返回转移额度
+        // 当前合约调用转帐到当前合约 并且返回转移额度 minter 是代币地址
         vars.actualMintAmount = doTransferIn(minter, mintAmount);
         // console.log("获取转账输入", vars.actualMintAmount);
         /*

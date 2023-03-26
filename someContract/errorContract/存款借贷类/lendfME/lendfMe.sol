@@ -698,13 +698,13 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         uint interestIndex;
     }
 
-    /**
+    /** 用户-> 市场 -> 数量 存款账本
       * @dev 2-level map: customerAddress -> assetAddress -> balance for supplies
       */
     mapping(address => mapping(address => Balance)) public supplyBalances;
 
 
-    /**
+    /**借贷 账本
       * @dev 2-level map: customerAddress -> assetAddress -> balance for borrows
       */
     mapping(address => mapping(address => Balance)) public borrowBalances;
@@ -752,19 +752,19 @@ contract MoneyMarket is Exponential, SafeToken {// begin
       * @dev The collateral ratio that borrows must maintain (e.g. 2 implies 2:1). This
       *      is initially set in the constructor, but can be changed by the admin.
       */
-    Exp public collateralRatio;//借出的抵押比例 2 表示 能借0.5的抵押品
+    Exp public collateralRatio;//借出的抵押比例 2 表示 能借0.5的抵押品 h  合约真实参数为 1250000000000000000  1.25 e18?
 
     /**
       * @dev originationFee for new borrows.
       *
       */
-    Exp public originationFee;// 借款的初始利率
+    Exp public originationFee;// 借款的初始利率 合约真实参数 100000000000000  0.001 e18
 
     /**
       * @dev liquidationDiscount for collateral when liquidating borrows
       *
       */
-    Exp public liquidationDiscount;// 清算比例
+    Exp public liquidationDiscount;// 清算折扣 合约真实参数 100000000000000000   e17
 
     /**
       * @dev flag for whether or not contract is paused
@@ -1084,7 +1084,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         Exp memory assetPrice;
         Exp memory assetAmount;
 
-        (err, assetPrice) = fetchAssetPrice(asset);
+        (err, assetPrice) = fetchAssetPrice(asset);//预言机 获取单价
         if (err != Error.NO_ERROR) {
             return (err, 0);
         }
@@ -1648,13 +1648,13 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         if (err != Error.NO_ERROR) {//要么返回可以存款-借款，0 要么 0，借款-存款
             return fail(err, FailureInfo.WITHDRAW_ACCOUNT_LIQUIDITY_CALCULATION_FAILED);
         }
-
+        //计算市场账本的存款本息率
         // We calculate the newSupplyIndex, user's supplyCurrent and supplyUpdated for the asset
         (err, localResults.newSupplyIndex) = calculateInterestIndex(market.supplyIndex, market.supplyRateMantissa, market.blockNumber, getBlockNumber());
         if (err != Error.NO_ERROR) {//(market.supplyRateMantissa*(getBlockNumber()-market.blockNumber)+1)*market.supplyIndex
             return fail(err, FailureInfo.WITHDRAW_NEW_SUPPLY_INDEX_CALCULATION_FAILED);//newSupplyIndex  1000300997585821901
-        }
-            //supplyBalance.principal*localResults.newSupplyIndex/supplyBalance.interestIndex
+        }   
+            //supplyBalance.principal*localResults.newSupplyIndex/supplyBalance.interestIndex 更新用户的存款本金
         (err, localResults.userSupplyCurrent) = calculateBalance(supplyBalance.principal, supplyBalance.interestIndex, localResults.newSupplyIndex);
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.WITHDRAW_ACCUMULATED_BALANCE_CALCULATION_FAILED);
@@ -1662,7 +1662,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
 
         // If the user specifies -1 amount to withdraw ("max"),  withdrawAmount => the lesser of withdrawCapacity and supplyCurrent
         if (requestedAmount == uint(-1)) {
-            (err, localResults.withdrawCapacity) = getAssetAmountForValue(asset, localResults.accountLiquidity);//总价格/这个代币的单价格 得出数量
+            (err, localResults.withdrawCapacity) = getAssetAmountForValue(asset, localResults.accountLiquidity);//总价格/这个代币的单价格 得出数量 根据现价来计算提取多少数量代币
             if (err != Error.NO_ERROR) {
                 return fail(err, FailureInfo.WITHDRAW_CAPACITY_CALCULATION_FAILED);
             }
@@ -1675,15 +1675,15 @@ contract MoneyMarket is Exponential, SafeToken {// begin
 
         // Fail gracefully if protocol has insufficient cash 如果protocol没有足够的资金，就优雅地失败
         // If protocol has insufficient cash, the sub operation will underflow.
-        localResults.currentCash = getCash(asset);
-        (err, localResults.updatedCash) = sub(localResults.currentCash, localResults.withdrawAmount);
+        localResults.currentCash = getCash(asset);//计算本合约目标代币的数量
+        (err, localResults.updatedCash) = sub(localResults.currentCash, localResults.withdrawAmount);// 更新数量为 减去提取金额
         if (err != Error.NO_ERROR) {
             return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_TRANSFER_OUT_NOT_POSSIBLE);
         }
 
         // We check that the amount is less than or equal to supplyCurrent
         // If amount is greater than supplyCurrent, this will fail with Error.INTEGER_UNDERFLOW
-        (err, localResults.userSupplyUpdated) = sub(localResults.userSupplyCurrent, localResults.withdrawAmount);
+        (err, localResults.userSupplyUpdated) = sub(localResults.userSupplyCurrent, localResults.withdrawAmount);//更新用户的存款数量
         if (err != Error.NO_ERROR) {
             return fail(Error.INSUFFICIENT_BALANCE, FailureInfo.WITHDRAW_NEW_TOTAL_BALANCE_CALCULATION_FAILED);
         }
@@ -1697,15 +1697,15 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         // Customer's withdrawCapacity of asset is (accountLiquidity in Eth)/ (price of asset in Eth)
         // Equivalently, we calculate the eth value of the withdrawal amount and compare it directly to the accountLiquidity in Eth
         (err, localResults.ethValueOfWithdrawal) = getPriceForAssetAmount(asset, localResults.withdrawAmount); // amount * oraclePrice = ethValueOfWithdrawal
-        if (err != Error.NO_ERROR) {
+        if (err != Error.NO_ERROR) {//提取数量的总价值
             return fail(err, FailureInfo.WITHDRAW_AMOUNT_VALUE_CALCULATION_FAILED);
         }
 
         // We check that the amount is less than withdrawCapacity (here), and less than or equal to supplyCurrent (below)
-        if (lessThanExp(localResults.accountLiquidity, localResults.ethValueOfWithdrawal) ) {// left<right
+        if (lessThanExp(localResults.accountLiquidity, localResults.ethValueOfWithdrawal) ) {// left<right 用户的流动性资产 要大于等于 兑款出来的总价值
             return fail(Error.INSUFFICIENT_LIQUIDITY, FailureInfo.WITHDRAW_AMOUNT_LIQUIDITY_SHORTFALL);
         }
-
+        //更新市场账户的存款数量
         // We calculate the protocol's totalSupply by subtracting the user's prior checkpointed balance, adding user's updated supply.
         // Note that, even though the customer is withdrawing, if they've accumulated a lot of interest since their last
         // action, the updated balance *could* be higher than the prior checkpointed balance.
@@ -1736,7 +1736,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         // (No safe failures beyond this point)
 
         // We ERC-20 transfer the asset into the protocol (note: pre-conditions already checked above)
-        err = doTransferOut(asset, msg.sender, localResults.withdrawAmount);
+        err = doTransferOut(asset, msg.sender, localResults.withdrawAmount);//赚钱给用户 提款走了
         if (err != Error.NO_ERROR) {
             // This is safe since it's our first interaction and it didn't do anything if it failed
             return fail(err, FailureInfo.WITHDRAW_TRANSFER_OUT_FAILED);
@@ -1794,8 +1794,8 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         
         Exp memory sumSupplyValuesFinal = Exp({mantissa: sumSupplyValuesMantissa});
         Exp memory sumBorrowValuesFinal; // need to apply collateral ratio
-
-        (err, sumBorrowValuesFinal) = mulExp(collateralRatio, Exp({mantissa: sumBorrowValuesMantissa}));//collateralRatio 为 2*10**18
+        //因为在这里计算借款时乘以了抵押率（抵押/借款），所以只要借款超过抵押率的借款，就会有短缺。
+        (err, sumBorrowValuesFinal) = mulExp(collateralRatio, Exp({mantissa: sumBorrowValuesMantissa}));//collateralRatio 为 2*10**18 这里将借款放大了抵押率
         if (err != Error.NO_ERROR) {
             return (err, Exp({mantissa: 0}), Exp({mantissa: 0}));
         }
@@ -1956,12 +1956,12 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         Error err;
         uint rateCalculationResultCode;
 
-        // We calculate the newBorrowIndex, user's borrowCurrent and borrowUpdated for the asset
+        // We calculate the newBorrowIndex, user's borrowCurrent and borrowUpdated for the asset 更新市场账本 借贷的本息率
         (err, localResults.newBorrowIndex) = calculateInterestIndex(market.borrowIndex, market.borrowRateMantissa, market.blockNumber, getBlockNumber());
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.REPAY_BORROW_NEW_BORROW_INDEX_CALCULATION_FAILED);
         }
-
+        //结算用户借贷数量
         (err, localResults.userBorrowCurrent) = calculateBalance(borrowBalance.principal, borrowBalance.interestIndex, localResults.newBorrowIndex);
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.REPAY_BORROW_ACCUMULATED_BALANCE_CALCULATION_FAILED);
@@ -1974,7 +1974,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         } else {
             localResults.repayAmount = amount;
         }
-
+        // 更新用户 借款数量
         // Subtract the `repayAmount` from the `userBorrowCurrent` to get `userBorrowUpdated`
         // Note: this checks that repayAmount is less than borrowCurrent
         (err, localResults.userBorrowUpdated) = sub(localResults.userBorrowCurrent, localResults.repayAmount);
@@ -1988,7 +1988,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.REPAY_BORROW_TRANSFER_IN_NOT_POSSIBLE);
         }
-
+        // 更新市场账本的借贷数量总量 理解成  市场借贷 先减去 之前用户借的数量 再加上 用户更新的新的借贷数量
         // We calculate the protocol's totalBorrow by subtracting the user's prior checkpointed balance, adding user's updated borrow
         // Note that, even though the customer is paying some of their borrow, if they've accumulated a lot of interest since their last
         // action, the updated balance *could* be higher than the prior checkpointed balance.
@@ -1998,26 +1998,26 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         }
 
         // We need to calculate what the updated cash will be after we transfer in from user
-        localResults.currentCash = getCash(asset);
+        localResults.currentCash = getCash(asset);// 查询本合约拥有多少 借贷代币的数量
 
-        (err, localResults.updatedCash) = add(localResults.currentCash, localResults.repayAmount);
+        (err, localResults.updatedCash) = add(localResults.currentCash, localResults.repayAmount);// 增加上还的代币的数量
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.REPAY_BORROW_NEW_TOTAL_CASH_CALCULATION_FAILED);
         }
 
         // The utilization rate has changed! We calculate a new supply index and borrow index for the asset, and save it.
-
+        //更新市场的存款 本息率
         // We calculate the newSupplyIndex, but we have newBorrowIndex already
         (err, localResults.newSupplyIndex) = calculateInterestIndex(market.supplyIndex, market.supplyRateMantissa, market.blockNumber, getBlockNumber());
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.REPAY_BORROW_NEW_SUPPLY_INDEX_CALCULATION_FAILED);
         }
-
+        // 更新存款利率
         (rateCalculationResultCode, localResults.newSupplyRateMantissa) = market.interestRateModel.getSupplyRate(asset, localResults.updatedCash, localResults.newTotalBorrows);
         if (rateCalculationResultCode != 0) {
             return failOpaque(FailureInfo.REPAY_BORROW_NEW_SUPPLY_RATE_CALCULATION_FAILED, rateCalculationResultCode);
         }
-
+        // 更新借款利率
         (rateCalculationResultCode, localResults.newBorrowRateMantissa) = market.interestRateModel.getBorrowRate(asset, localResults.updatedCash, localResults.newTotalBorrows);
         if (rateCalculationResultCode != 0) {
             return failOpaque(FailureInfo.REPAY_BORROW_NEW_BORROW_RATE_CALCULATION_FAILED, rateCalculationResultCode);
@@ -2028,7 +2028,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         // (No safe failures beyond this point)
 
         // We ERC-20 transfer the asset into the protocol (note: pre-conditions already checked above)
-        err = doTransferIn(asset, msg.sender, localResults.repayAmount);
+        err = doTransferIn(asset, msg.sender, localResults.repayAmount);//转钱
         if (err != Error.NO_ERROR) {
             // This is safe since it's our first interaction and it didn't do anything if it failed
             return fail(err, FailureInfo.REPAY_BORROW_TRANSFER_IN_FAILED);
@@ -2141,16 +2141,16 @@ contract MoneyMarket is Exponential, SafeToken {// begin
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
     function liquidateBorrow(address targetAccount, address assetBorrow, address assetCollateral, uint requestedAmountClose) public returns (uint) {//conwy 清算借款
-        if (paused) {//targetAccount 需要清算的账号 assetBorrow 借的资产 assetCollateral 抵押资产 requestedAmountClose  偿还金额
+        if (paused) {//targetAccount 需要清算的账号 assetBorrow 被清算人借的资产 assetCollateral 被清算人的抵押资产 requestedAmountClose  偿还金额
             return fail(Error.CONTRACT_PAUSED, FailureInfo.LIQUIDATE_CONTRACT_PAUSED);
         }
         LiquidateLocalVars memory localResults;
         // Copy these addresses into the struct for use with `emitLiquidationEvent`
         // We'll use localResults.liquidator inside this function for clarity vs using msg.sender.
         localResults.targetAccount = targetAccount;//目标账户
-        localResults.assetBorrow = assetBorrow;// 要偿还的市场资产
+        localResults.assetBorrow = assetBorrow;// 要偿还的市场资产 数量
         localResults.liquidator = msg.sender; // liquidator 清算人
-        localResults.assetCollateral = assetCollateral;// 抵押资产
+        localResults.assetCollateral = assetCollateral;// 抵押资产 想获取
 
         Market storage borrowMarket = markets[assetBorrow];//借的资产的市场账本 
         Market storage collateralMarket = markets[assetCollateral];//抵押品的市场账本
@@ -2163,12 +2163,12 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         uint rateCalculationResultCode; // Used for multiple interest rate calculation calls 用于多次利率调用 ？？
         Error err; // re-used for all intermediate errors
 
-        (err, localResults.collateralPrice) = fetchAssetPrice(assetCollateral);//获取抵押品的单价价格
+        (err, localResults.collateralPrice) = fetchAssetPrice(assetCollateral);//获取抵押品的单价价格 这里会和预言机交互
         if(err != Error.NO_ERROR) {
             return fail(err, FailureInfo.LIQUIDATE_FETCH_ASSET_PRICE_FAILED);
         }
 
-        (err, localResults.underwaterAssetPrice) = fetchAssetPrice(assetBorrow);// 获取借贷资产的价格
+        (err, localResults.underwaterAssetPrice) = fetchAssetPrice(assetBorrow);// 获取借贷资产的价格 这里会和预言机交互
         // If the price oracle is not set, then we would have failed on the first call to fetchAssetPrice
         assert(err == Error.NO_ERROR);
         // 获取借贷品的市场的新利率
@@ -2177,7 +2177,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.LIQUIDATE_NEW_BORROW_INDEX_CALCULATION_FAILED_BORROWED_ASSET);
         }
-        //计算要清算账户的 借款金额
+        //计算要清算账户的 借款金额（截止到目前的借贷本金和借贷利息）  或者说 结算 当前的借贷本金和借贷利息是多少
         (err, localResults.currentBorrowBalance_TargetUnderwaterAsset) = calculateBalance(borrowBalance_TargeUnderwaterAsset.principal, borrowBalance_TargeUnderwaterAsset.interestIndex, localResults.newBorrowIndex_UnderwaterAsset);
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.LIQUIDATE_ACCUMULATED_BORROW_BALANCE_CALCULATION_FAILED);
@@ -2188,12 +2188,12 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.LIQUIDATE_NEW_SUPPLY_INDEX_CALCULATION_FAILED_COLLATERAL_ASSET);
         }
-        // 计算要清算账户的 抵押品金额
+        // 计算要清算账户的 抵押品金额（截止到目前为止的抵押本金和利息）或者 结算当前的抵押品本金和存款利息
         (err, localResults.currentSupplyBalance_TargetCollateralAsset) = calculateBalance(supplyBalance_TargetCollateralAsset.principal, supplyBalance_TargetCollateralAsset.interestIndex, localResults.newSupplyIndex_CollateralAsset);
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.LIQUIDATE_ACCUMULATED_SUPPLY_BALANCE_CALCULATION_FAILED_BORROWER_COLLATERAL_ASSET);
         }
-        // 清算人 拥有的抵押品的金额
+        // 清算人 拥有的抵押品的金额 （截止到目前为止） 或者 结算 清算人的 抵押品和利息
         // Liquidator may or may not already have some collateral asset.
         // If they do, we need to accumulate interest on it before adding the seized collateral to it.
         // We re-use newSupplyIndex_CollateralAsset calculated above to help calculate currentSupplyBalance_LiquidatorCollateralAsset
@@ -2203,7 +2203,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         }
 
         // We update the protocol's totalSupply for assetCollateral in 2 steps, first by adding target user's accumulated
-        // interest and then by adding the liquidator's accumulated interest.
+        // interest and then by adding the liquidator's accumulated interest.我们分两步更新协议对资产抵押的总供应，首先添加目标用户的累计利息，然后添加清算人的累计利息。
 
         // Step 1 of 2: We add the target user's supplyCurrent and subtract their checkpointedBalance
         // (which has the desired effect of adding accrued interest from the target user) 抵押市场的数量 + 要清算的抵押品的数量（本金加利息） - 用清算用户的本金数量
@@ -2217,26 +2217,26 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         (err, localResults.newTotalSupply_ProtocolCollateralAsset) = addThenSub(localResults.newTotalSupply_ProtocolCollateralAsset, localResults.currentSupplyBalance_LiquidatorCollateralAsset, supplyBalance_LiquidatorCollateralAsset.principal);
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.LIQUIDATE_NEW_TOTAL_SUPPLY_BALANCE_CALCULATION_FAILED_LIQUIDATOR_COLLATERAL_ASSET);
-        }
+        }// 以上两步 是结算出市场的当前抵押数量是多少  原有本金 加 被清算人利息 和清算人利息
 
         // We calculate maxCloseableBorrowAmount_TargetUnderwaterAsset, the amount of borrow that can be closed from the target user 计算清算人 偿还借款的数量
         // This is equal to the lesser of
         // 1. borrowCurrent; (already calculated)
-        // 2. ONLY IF MARKET SUPPORTED: discountedRepayToEvenAmount:
+        // 2. ONLY IF MARKET SUPPORTED: discountedRepayToEvenAmount: 只有在市场支持的情况下:贴现偿还至相等金额 合约真实 collateralRatio 是抵押率 是1.25 e18
         // discountedRepayToEvenAmount=
-        //      shortfall / [Oracle price for the borrow * (collateralRatio - liquidationDiscount - 1)]       liquidationDiscount是清算比例 是个全局变量
-        // 3. discountedBorrowDenominatedCollateral
+        //      shortfall / [Oracle price for the borrow * (collateralRatio - liquidationDiscount - 1)]       liquidationDiscount 是清算折扣 是个全局变量 合约真实数据 是e17 等价 0.1
+        // 3. discountedBorrowDenominatedCollateral  贴现借款计价抵押品
         //      [supplyCurrent / (1 + liquidationDiscount)] * (Oracle price for the collateral / Oracle price for the borrow)
 
         // Here we calculate item 3. discountedBorrowDenominatedCollateral = 贴现借贷计抵押品
         // [supplyCurrent / (1 + liquidationDiscount)] * (Oracle price for the collateral / Oracle price for the borrow)
-        (err, localResults.discountedBorrowDenominatedCollateral) =
+        (err, localResults.discountedBorrowDenominatedCollateral) =// 计算偿还多少借贷的数量（全部偿还的数量） 0.1 应该是清算人奖励 偿还10/11的借贷数量 就能获取全部抵押品 
         calculateDiscountedBorrowDenominatedCollateral(localResults.underwaterAssetPrice, localResults.collateralPrice, localResults.currentSupplyBalance_TargetCollateralAsset);
-        if (err != Error.NO_ERROR) {//localResults.underwaterAssetPrice 借款现价
+        if (err != Error.NO_ERROR) {//localResults.underwaterAssetPrice 借款现单价 localResults.collateralPrice 抵押品现单价 localResults.currentSupplyBalance_TargetCollateralAsset 要清算账户的抵押品的本金和利息
             return fail(err, FailureInfo.LIQUIDATE_BORROW_DENOMINATED_COLLATERAL_CALCULATION_FAILED);
         }
 
-        if (borrowMarket.isSupported) {
+        if (borrowMarket.isSupported) {// isSupported 有两个意思 一是 是否有这个市场 二 是 这个市场是否暂停  暂停的话  只能取款 偿还借款 清算
             // Market is supported, so we calculate item 2 from above.
             (err, localResults.discountedRepayToEvenAmount) =
             calculateDiscountedRepayToEvenAmount(targetAccount, localResults.underwaterAssetPrice);
@@ -2245,7 +2245,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
             }
 
             // We need to do a two-step min to select from all 3 values
-            // min1&3 = min(item 1, item 3)
+            // min1&3 = min(item 1, item 3)  currentBorrowBalance_TargetUnderwaterAsset 用户的借款加利息 借贷品的数量计价
             localResults.maxCloseableBorrowAmount_TargetUnderwaterAsset = min(localResults.currentBorrowBalance_TargetUnderwaterAsset, localResults.discountedBorrowDenominatedCollateral);
 
             // min1&3&2 = min(min1&3, 2)
@@ -2257,7 +2257,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
 
         // If liquidateBorrowAmount = -1, then closeBorrowAmount_TargetUnderwaterAsset = maxCloseableBorrowAmount_TargetUnderwaterAsset
         if (requestedAmountClose == uint(-1)) {
-            localResults.closeBorrowAmount_TargetUnderwaterAsset = localResults.maxCloseableBorrowAmount_TargetUnderwaterAsset;
+            localResults.closeBorrowAmount_TargetUnderwaterAsset = localResults.maxCloseableBorrowAmount_TargetUnderwaterAsset;// 这里就是计算 最大清算的数量（借款的代币的数量）
         } else {
             localResults.closeBorrowAmount_TargetUnderwaterAsset = requestedAmountClose;
         }
@@ -2266,9 +2266,9 @@ contract MoneyMarket is Exponential, SafeToken {// begin
 
         // Verify closeBorrowAmount_TargetUnderwaterAsset <= maxCloseableBorrowAmount_TargetUnderwaterAsset
         if (localResults.closeBorrowAmount_TargetUnderwaterAsset > localResults.maxCloseableBorrowAmount_TargetUnderwaterAsset) {
-            return fail(Error.INVALID_CLOSE_AMOUNT_REQUESTED, FailureInfo.LIQUIDATE_CLOSE_AMOUNT_TOO_HIGH);
+            return fail(Error.INVALID_CLOSE_AMOUNT_REQUESTED, FailureInfo.LIQUIDATE_CLOSE_AMOUNT_TOO_HIGH);//平仓金额过高
         }
-
+        //根据偿还金额数量和单价  计算扣押多少抵押资产数量
         // seizeSupplyAmount_TargetCollateralAsset = closeBorrowAmount_TargetUnderwaterAsset * priceBorrow/priceCollateral *(1+liquidationDiscount)
         (err, localResults.seizeSupplyAmount_TargetCollateralAsset) = calculateAmountSeize(localResults.underwaterAssetPrice, localResults.collateralPrice, localResults.closeBorrowAmount_TargetUnderwaterAsset);
         if (err != Error.NO_ERROR) {
@@ -2277,7 +2277,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
 
         // We are going to ERC-20 transfer closeBorrowAmount_TargetUnderwaterAsset of assetBorrow into Compound
         // Fail gracefully if asset is not approved or has insufficient balance
-        err = checkTransferIn(assetBorrow, localResults.liquidator, localResults.closeBorrowAmount_TargetUnderwaterAsset);
+        err = checkTransferIn(assetBorrow, localResults.liquidator, localResults.closeBorrowAmount_TargetUnderwaterAsset);//检查清算人 借贷资产的授权值 和 数量是否满足要求 进行参数校验 
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.LIQUIDATE_TRANSFER_IN_NOT_POSSIBLE);
         }
@@ -2285,7 +2285,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         // We are going to repay the target user's borrow using the calling user's funds
         // We update the protocol's totalBorrow for assetBorrow, by subtracting the target user's prior checkpointed balance,
         // adding borrowCurrent, and subtracting closeBorrowAmount_TargetUnderwaterAsset.
-
+        // 更新借贷数量 借的数量 - 还的数量
         // Subtract the `closeBorrowAmount_TargetUnderwaterAsset` from the `currentBorrowBalance_TargetUnderwaterAsset` to get `updatedBorrowBalance_TargetUnderwaterAsset`
         (err, localResults.updatedBorrowBalance_TargetUnderwaterAsset) = sub(localResults.currentBorrowBalance_TargetUnderwaterAsset, localResults.closeBorrowAmount_TargetUnderwaterAsset);
         // We have ensured above that localResults.closeBorrowAmount_TargetUnderwaterAsset <= localResults.currentBorrowBalance_TargetUnderwaterAsset, so the sub can't underflow
@@ -2295,20 +2295,20 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         // Note that, even though the liquidator is paying some of the borrow, if the borrow has accumulated a lot of interest since the last
         // action, the updated balance *could* be higher than the prior checkpointed balance.
         (err, localResults.newTotalBorrows_ProtocolUnderwaterAsset) = addThenSub(borrowMarket.totalBorrows, localResults.updatedBorrowBalance_TargetUnderwaterAsset, borrowBalance_TargeUnderwaterAsset.principal);
-        if (err != Error.NO_ERROR) {
+        if (err != Error.NO_ERROR) {//更新市场账本   市场借贷金额= 市场借贷金额+被清算人的借贷本金+利息-清算人还款-被清算人的借贷本金  理解成 市场借贷金额= 市场借贷金额-被清算人的借贷本金+被清算人的借贷本金+利息-清算人还款
             return fail(err, FailureInfo.LIQUIDATE_NEW_TOTAL_BORROW_CALCULATION_FAILED_BORROWED_ASSET);
         }
 
-        // We need to calculate what the updated cash will be after we transfer in from liquidator
-        localResults.currentCash_ProtocolUnderwaterAsset = getCash(assetBorrow);
+        // We need to calculate what the updated cash will be after we transfer in from liquidator 我们需要计算从清算人转入后更新后的现金是多少
+        localResults.currentCash_ProtocolUnderwaterAsset = getCash(assetBorrow);//本合约拥有多少借贷资产按数量计数
         (err, localResults.updatedCash_ProtocolUnderwaterAsset) = add(localResults.currentCash_ProtocolUnderwaterAsset, localResults.closeBorrowAmount_TargetUnderwaterAsset);
-        if (err != Error.NO_ERROR) {
+        if (err != Error.NO_ERROR) {//加上还的钱
             return fail(err, FailureInfo.LIQUIDATE_NEW_TOTAL_CASH_CALCULATION_FAILED_BORROWED_ASSET);
         }
 
         // The utilization rate has changed! We calculate a new supply index, borrow index, supply rate, and borrow rate for assetBorrow
         // (Please note that we don't need to do the same thing for assetCollateral because neither cash nor borrows of assetCollateral happen in this process.)
-
+        // 资金使用率变化 更新存款利率
         // We calculate the newSupplyIndex_UnderwaterAsset, but we already have newBorrowIndex_UnderwaterAsset so don't recalculate it.
         (err, localResults.newSupplyIndex_UnderwaterAsset) = calculateInterestIndex(borrowMarket.supplyIndex, borrowMarket.supplyRateMantissa, borrowMarket.blockNumber, getBlockNumber());
         if (err != Error.NO_ERROR) {
@@ -2324,7 +2324,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         if (rateCalculationResultCode != 0) {
             return failOpaque(FailureInfo.LIQUIDATE_NEW_BORROW_RATE_CALCULATION_FAILED_BORROWED_ASSET, rateCalculationResultCode);
         }
-
+        //更新借贷利率
         // Now we look at collateral. We calculated target user's accumulated supply balance and the supply index above.
         // Now we need to calculate the borrow index.
         // We don't need to calculate new rates for the collateral asset because we have not changed utilization:
@@ -2334,14 +2334,14 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         if (err != Error.NO_ERROR) {
             return fail(err, FailureInfo.LIQUIDATE_NEW_BORROW_INDEX_CALCULATION_FAILED_COLLATERAL_ASSET);
         }
-
+        //新被清算账户抵押资产=被清算账户的抵押资产-扣除的资产
         // We checkpoint the target user's assetCollateral supply balance, supplyCurrent - seizeSupplyAmount_TargetCollateralAsset at the updated index
         (err, localResults.updatedSupplyBalance_TargetCollateralAsset) = sub(localResults.currentSupplyBalance_TargetCollateralAsset, localResults.seizeSupplyAmount_TargetCollateralAsset);
         // The sub won't underflow because because seizeSupplyAmount_TargetCollateralAsset <= target user's collateral balance
         // maxCloseableBorrowAmount_TargetUnderwaterAsset is limited by the discounted borrow denominated collateral. That limits closeBorrowAmount_TargetUnderwaterAsset
         // which in turn limits seizeSupplyAmount_TargetCollateralAsset.
         assert (err == Error.NO_ERROR);
-
+        //新清算账户抵押品数量=清算账户抵押资产数量+扣除的资产
         // We checkpoint the liquidating user's assetCollateral supply balance, supplyCurrent + seizeSupplyAmount_TargetCollateralAsset at the updated index
         (err, localResults.updatedSupplyBalance_LiquidatorCollateralAsset) = add(localResults.currentSupplyBalance_LiquidatorCollateralAsset, localResults.seizeSupplyAmount_TargetCollateralAsset);
         // We can't overflow here because if this would overflow, then we would have already overflowed above and failed
@@ -2353,14 +2353,14 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         // (No safe failures beyond this point)
 
         // We ERC-20 transfer the asset into the protocol (note: pre-conditions already checked above)
-        err = doTransferIn(assetBorrow, localResults.liquidator, localResults.closeBorrowAmount_TargetUnderwaterAsset);
+        err = doTransferIn(assetBorrow, localResults.liquidator, localResults.closeBorrowAmount_TargetUnderwaterAsset);//清算人转移 还的资产到本合约
         if (err != Error.NO_ERROR) {
             // This is safe since it's our first interaction and it didn't do anything if it failed
             return fail(err, FailureInfo.LIQUIDATE_TRANSFER_IN_FAILED);
         }
 
-        // Save borrow market updates
-        borrowMarket.blockNumber = getBlockNumber();
+        // Save borrow market updates 更新市场借贷账本
+        borrowMarket.blockNumber = getBlockNumber();// 更新区块
         borrowMarket.totalBorrows = localResults.newTotalBorrows_ProtocolUnderwaterAsset;
         // borrowMarket.totalSupply does not need to be updated
         borrowMarket.supplyRateMantissa = localResults.newSupplyRateMantissa_ProtocolUnderwaterAsset;
@@ -2368,7 +2368,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         borrowMarket.borrowRateMantissa = localResults.newBorrowRateMantissa_ProtocolUnderwaterAsset;
         borrowMarket.borrowIndex = localResults.newBorrowIndex_UnderwaterAsset;
 
-        // Save collateral market updates
+        // Save collateral market updates更新抵押账本
         // We didn't calculate new rates for collateralMarket (because neither cash nor borrows changed), just new indexes and total supply.
         collateralMarket.blockNumber = getBlockNumber();
         collateralMarket.totalSupply = localResults.newTotalSupply_ProtocolCollateralAsset;
@@ -2378,16 +2378,16 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         // Save user updates
 
         localResults.startingBorrowBalance_TargetUnderwaterAsset = borrowBalance_TargeUnderwaterAsset.principal; // save for use in event
-        borrowBalance_TargeUnderwaterAsset.principal = localResults.updatedBorrowBalance_TargetUnderwaterAsset;
-        borrowBalance_TargeUnderwaterAsset.interestIndex = localResults.newBorrowIndex_UnderwaterAsset;
+        borrowBalance_TargeUnderwaterAsset.principal = localResults.updatedBorrowBalance_TargetUnderwaterAsset;//更新被清算账户借贷账户的本金
+        borrowBalance_TargeUnderwaterAsset.interestIndex = localResults.newBorrowIndex_UnderwaterAsset;//被清算账户借贷账户的本息率
 
         localResults.startingSupplyBalance_TargetCollateralAsset = supplyBalance_TargetCollateralAsset.principal; // save for use in event
-        supplyBalance_TargetCollateralAsset.principal = localResults.updatedSupplyBalance_TargetCollateralAsset;
-        supplyBalance_TargetCollateralAsset.interestIndex = localResults.newSupplyIndex_CollateralAsset;
+        supplyBalance_TargetCollateralAsset.principal = localResults.updatedSupplyBalance_TargetCollateralAsset;//更新被清算账户的存款账本的本金
+        supplyBalance_TargetCollateralAsset.interestIndex = localResults.newSupplyIndex_CollateralAsset;//更新被清算账户的存款的本息率
 
         localResults.startingSupplyBalance_LiquidatorCollateralAsset = supplyBalance_LiquidatorCollateralAsset.principal; // save for use in event
-        supplyBalance_LiquidatorCollateralAsset.principal = localResults.updatedSupplyBalance_LiquidatorCollateralAsset;
-        supplyBalance_LiquidatorCollateralAsset.interestIndex = localResults.newSupplyIndex_CollateralAsset;
+        supplyBalance_LiquidatorCollateralAsset.principal = localResults.updatedSupplyBalance_LiquidatorCollateralAsset;//更新清算账户的存款账本的本金
+        supplyBalance_LiquidatorCollateralAsset.interestIndex = localResults.newSupplyIndex_CollateralAsset;//更新清算账户的存款的本息率
 
         emitLiquidationEvent(localResults);
 
@@ -2422,15 +2422,15 @@ contract MoneyMarket is Exponential, SafeToken {// begin
     function calculateDiscountedRepayToEvenAmount(address targetAccount, Exp memory underwaterAssetPrice) internal view returns (Error, uint) {
         Error err;
         Exp memory _accountLiquidity; // unused return value from calculateAccountLiquidity
-        Exp memory accountShortfall_TargetUser;
+        Exp memory accountShortfall_TargetUser;// 欠的钱
         Exp memory collateralRatioMinusLiquidationDiscount; // collateralRatio - liquidationDiscount
         Exp memory discountedCollateralRatioMinusOne; // collateralRatioMinusLiquidationDiscount - 1, aka collateralRatio - liquidationDiscount - 1
         Exp memory discountedPrice_UnderwaterAsset;
         Exp memory rawResult;
 
         // we calculate the target user's shortfall, denominated in Ether, that the user is below the collateral ratio
-        (err, _accountLiquidity, accountShortfall_TargetUser) = calculateAccountLiquidity(targetAccount);
-        if (err != Error.NO_ERROR) {
+        (err, _accountLiquidity, accountShortfall_TargetUser) = calculateAccountLiquidity(targetAccount);// 返回的参数 第二个是存款-借款 第三个是借款-存款
+        if (err != Error.NO_ERROR) {// 这里是返回的价值金额
             return (err, 0);
         }
 
