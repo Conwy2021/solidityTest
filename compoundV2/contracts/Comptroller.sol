@@ -518,8 +518,8 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
 
             /* The liquidator may not repay more than what is allowed by the closeFactor */
             // 清算人不得偿还超过 closeFactor 允许的数额 50%
-            uint maxClose = mul_ScalarTruncate(Exp({mantissa: closeFactorMantissa}), borrowBalance);
-            // 清算额度超过计算额度  返回错误
+            uint maxClose = mul_ScalarTruncate(Exp({mantissa: closeFactorMantissa}), borrowBalance);//closeFactorMantissa   50% = 1e18 * 0.5
+            // 清算额度超过计算额度  返回错误 
             // console.log(repayAmount,maxClose);
             if (repayAmount > maxClose) {
                 return uint(Error.TOO_MUCH_REPAY);
@@ -747,7 +747,7 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
       * 假设账户缺口低于抵押品要求）
       */
     // 计算当前用户的总持仓资产价值 是否大于总借贷价值
-    function getHypotheticalAccountLiquidityInternal(
+    function getHypotheticalAccountLiquidityInternal( //conwy  重要函数 计算有没有短缺
         address account,    //  查询的用户
         CToken cTokenModify,    //  cToken
         uint redeemTokens,  //  假设赎回的代币数量
@@ -782,7 +782,7 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
 
             // Get the normalized price of the asset
             // 获取当前资产的价格
-            vars.oraclePriceMantissa = oracle.getUnderlyingPrice(asset);
+            vars.oraclePriceMantissa = oracle.getUnderlyingPrice(asset);//抵押的资产 价格
             if (vars.oraclePriceMantissa == 0) {
                 return (Error.PRICE_ERROR, 0, 0);
             }// 设置价格
@@ -795,12 +795,12 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
             // console.log("vars.sumCollateral 总抵押品",vars.sumCollateral);
             // sumCollateral += tokensToDenom * cTokenBalance
             // 单个货币价值 * cToken额度 + 总抵押品 = 总抵押品
-            vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);
+            vars.sumCollateral = mul_ScalarTruncateAddUInt(vars.tokensToDenom, vars.cTokenBalance, vars.sumCollateral);//总抵押品价值
             // console.log("vars.sumCollateral 总抵押品",vars.sumCollateral);
 
             // sumBorrowPlusEffects += oraclePrice * borrowBalance
             // 借款额度 = 价格 * 借款数量
-            vars.sumBorrowPlusEffects = mul_ScalarTruncateAddUInt(vars.oraclePrice, vars.borrowBalance, vars.sumBorrowPlusEffects);
+            vars.sumBorrowPlusEffects = mul_ScalarTruncateAddUInt(vars.oraclePrice, vars.borrowBalance, vars.sumBorrowPlusEffects);//总借贷价值
 
             // Calculate effects of interacting with cTokenModify
             // 当前货币 = 借入资产
@@ -855,7 +855,7 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
         Exp memory denominator;
         Exp memory ratio;
 
-        numerator = mul_(Exp({mantissa: liquidationIncentiveMantissa}), Exp({mantissa: priceBorrowedMantissa}));
+        numerator = mul_(Exp({mantissa: liquidationIncentiveMantissa}), Exp({mantissa: priceBorrowedMantissa})); // liquidationIncentiveMantissa 清算系数 1.08 =  1e8 * 1.08
         denominator = mul_(Exp({mantissa: priceCollateralMantissa}), Exp({mantissa: exchangeRateMantissa}));
         ratio = div_(numerator, denominator);
 

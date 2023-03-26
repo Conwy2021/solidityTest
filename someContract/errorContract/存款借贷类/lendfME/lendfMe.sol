@@ -655,7 +655,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
       */
     constructor() public {
         admin = msg.sender;
-        collateralRatio = Exp({mantissa: 2 * mantissaOne});
+        collateralRatio = Exp({mantissa: 2 * mantissaOne});//mantissaOne = 10**18
         originationFee = Exp({mantissa: defaultOriginationFee});
         liquidationDiscount = Exp({mantissa: 0});
         // oracle must be configured via _setOracle

@@ -1,0 +1,9 @@
+Compound: Comptroller 合约使用的是一个合约 
+也是在这里记录用户多个抵押资产信息
+
+accountAssets[account]  变量 在storage 合约中记录
+
+ /**
+     * @notice 记录用户参与的资产，不区分存款和借款！！！
+     */
+    mapping(address => CToken[]) public accountAssets;

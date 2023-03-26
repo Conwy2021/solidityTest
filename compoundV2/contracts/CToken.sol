@@ -604,7 +604,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     // * @return（uint，uint）错误代码（0=成功，否则为失败，请参阅ErrorReporter.sol）和实际的薄荷金额。
     // 供应功能允许供应商将资产转移到货币市场。然后，该资产开始根据该资产的当前供应利率累计利息。
     function mintInternal(uint mintAmount) internal nonReentrant returns (uint, uint) {
-        // 计算利息
+        // 计算借款利息
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // 在同一区块的话 不执行
@@ -651,7 +651,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         }
 
         MintLocalVars memory vars;
-        //  错误代码 存款汇率   获取存款汇率
+        //  错误代码  获取兑换率
         (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
         if (vars.mathErr != MathError.NO_ERROR) {
             return (failOpaque(Error.MATH_ERROR, FailureInfo.MINT_EXCHANGE_RATE_READ_FAILED, uint(vars.mathErr)), 0);
@@ -1189,7 +1189,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
       * @return (uint, uint) 错误码（0=成功，否则失败，见ErrorReporter.sol），实际还款金额。
       */
     //  指定 a 清算 b 指定额度。最多50%
-    function liquidateBorrowFresh(
+    function liquidateBorrowFresh(// conwy 清算
         address liquidator, 
         address borrower, 
         uint repayAmount, 
@@ -1235,7 +1235,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
 
         /* Fail if repayBorrow fails */
         // 给指定地址还款
-        (uint repayBorrowError, uint actualRepayAmount) = repayBorrowFresh(
+        (uint repayBorrowError, uint actualRepayAmount) = repayBorrowFresh(//还钱 代币转移交互
             liquidator, //  清算人
             borrower,   //  借款人
             repayAmount //  清算额度
@@ -1355,10 +1355,10 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
             return failOpaque(Error.MATH_ERROR, FailureInfo.LIQUIDATE_SEIZE_BALANCE_DECREMENT_FAILED, uint(vars.mathErr));
         }
 
-        // 更具要获取cToken的数量 * 从清算人中获取的清算激励？？？
-        vars.protocolSeizeTokens = mul_(seizeTokens, Exp({mantissa: protocolSeizeShareMantissa}));
+        // 更具要清算奖励的一部分 添加到储备金里
+        vars.protocolSeizeTokens = mul_(seizeTokens, Exp({mantissa: protocolSeizeShareMantissa}));//protocolSeizeShareMantissa 2.8e16; //2.8%
         // 此次清算激励？？的总数 =  seizeTokens - vars.protocolSeizeTokens
-        vars.liquidatorSeizeTokens = sub_(seizeTokens, vars.protocolSeizeTokens);
+        vars.liquidatorSeizeTokens = sub_(seizeTokens, vars.protocolSeizeTokens);//protocolSeizeTokens 是 储备金
 
         // 获取存款汇率
         (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
@@ -1387,7 +1387,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         // 更新流通代币总量总量
         totalSupply = vars.totalSupplyNew;
         // 更新 代清算人和清算和的资产总量
-        // 这里 清算人手机代币数量没有减少，减少的是系统中有的数量。当清算人提出超出系统的清算数量不会提取成功，因为系统额度不足。
+        // 这里 清算人手里代币数量没有减少，减少的是系统中有的数量。当清算人提出超出系统的清算数量不会提取成功，因为系统额度不足。
         accountTokens[borrower] = vars.borrowerTokensNew;
         accountTokens[liquidator] = vars.liquidatorTokensNew;
 

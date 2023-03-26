@@ -36,7 +36,7 @@ contract CErc20Delegator is CTokenInterface, CErc20Interface, CDelegatorInterfac
         bytes memory becomeImplementationData
     ) public {
         // Creator of the contract is admin during initialization
-        admin = msg.sender;
+        admin = msg.sender; // admin 参数在storage合约
 
         // First delegate gets to initialize the delegator (i.e. storage contract)
         // 委托合约调用初始化方法
