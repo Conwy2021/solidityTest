@@ -15,19 +15,16 @@ contract Reentrance {
   function balanceOf(address _who) public view returns (uint balance) {
     return balances[_who];
   }
-  uint num  =  0 ;
-  function withdraw(uint _amount) public {
-    if(balances[msg.sender] >= _amount) {
-      (bool result,) = msg.sender.call{value:_amount}("");
-      if(result) {
-        _amount;
-      }
-      balances[msg.sender] -= _amount; //这里存在溢出问题  不然重入减去为负值 报错的话 也无法超额提款
-      console.log(balances[msg.sender]);
-      num++;
-      console.log(num);
+  
+    function withdraw() external {
+        uint256 balance = balanceOf(msg.sender); // 获取余额
+        require(balance > 0, "Insufficient balance");
+        // 转账 ether !!! 可能激活恶意合约的fallback/receive函数，有重入风险！
+        (bool success, ) = msg.sender.call{value: balance}("");
+        require(success, "Failed to send Ether");
+        // 更新余额
+        balances[msg.sender] = 0;
     }
-  }
 
   receive() external payable {}
 }
