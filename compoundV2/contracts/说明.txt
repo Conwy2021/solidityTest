@@ -48,3 +48,5 @@ accountAssets[account]  变量 在storage 合约中记录
 	
 	v2 只能存什么 取什么 
 	但是清算可以选获取哪种用户哪种抵押品
+
+    compound 只用抵押品 需要授权给合约  cToken 不需要授权
