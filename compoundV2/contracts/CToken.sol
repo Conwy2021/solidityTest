@@ -177,7 +177,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
      * @param amount The number of tokens to transfer
      * @return Whether or not the transfer succeeded
      */
-    function transferFrom(address src, address dst, uint256 amount) external nonReentrant returns (bool) {
+    function transferFrom(address src, address dst, uint256 amount) external nonReentrant returns (bool) {//授权转账
         return transferTokens(msg.sender, src, dst, amount) == uint(Error.NO_ERROR);
     }
 
@@ -427,7 +427,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
              * If there are no tokens minted:
              *  exchangeRate = initialExchangeRate
              */
-            // 返回 默认汇率 == 0
+            // 返回 默认汇率 > 0
             return (MathError.NO_ERROR, initialExchangeRateMantissa);
         } else {
             /*
@@ -669,7 +669,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         *在收费的情况下。成功后，cToken将持有额外的“actualMintMount”`
         *现金。
         */
-        //  cToken 和cEth 不通方法实现
+        //  cToken 和cEth 不同方法实现
         // 当前合约调用转帐到当前合约 并且返回转移额度 minter 是代币地址
         vars.actualMintAmount = doTransferIn(minter, mintAmount);
         // console.log("获取转账输入", vars.actualMintAmount);
@@ -708,16 +708,14 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         return (uint(Error.NO_ERROR), vars.actualMintAmount);
     }
 
-    /**
+    /** 这里提取 提供了两种 提款思路 一直是按cToken 提 一种是按 Token 提 
     * @notice Sender兑换cToken换取基础资产
     * @dev 除非还原，否则无论操作是否成功都会产生利息
     * @param redeemTokens 要兑换为基础的cTokens数量
     * @return uint 0=成功，否则为失败（有关详细信息，请参阅ErrorReporter.sol）
     */
-    //  获取全部赎回数量情况下 cToken对换token得数量
-    // 提款功能将用户的资产从货币市场转回给用户，具有降低协议中用户的供给平衡的作用。
-    // 根据最新的汇率计算cToken能换多少标的资产
-    function redeemInternal(uint redeemTokens) internal nonReentrant returns (uint) {
+    //传入 cToken 数量提取 Token
+    function redeemInternal(uint redeemTokens) internal nonReentrant returns (uint) { 
         // 计算汇率
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
@@ -735,7 +733,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     * @param redeemAmount 从兑换 cTokens中获得的基础金额
     * @return uint 0=成功，否则为失败（有关详细信息，请参阅ErrorReporter.sol）
     */
-    // 根据传入标的资产数量  兑换出 标的资产 发送给用户。
+    // 传入 Token 数量 提取Token
     function redeemUnderlyingInternal(uint redeemAmount) internal nonReentrant returns (uint) {
         // 计算汇率
         uint error = accrueInterest();
@@ -762,8 +760,8 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     * @notice 用户兑换cToken以换取基础资产
     * @dev 假设利息已经累积到当前区块
     * @param 兑换者兑换代币的账户地址
-    * @param redeemTokensIn 要兑换为基础的cTokens的数量（只有一个recemvetokensin或recemveAmountIn可能不为零）
-    * @param redeemAmountIn 从兑换cTokens中接收的基础代币数量（只能有一个recovemTokensIn或recovemAmuntIn为非零）
+    * @param redeemTokensIn cTokens的数量
+    * @param redeemAmountIn token 数量
     * @return uint 0=成功，否则为失败（有关详细信息，请参阅ErrorReporter.sol）
     */
     //  计算 赎回 cToken 兑换 token 数量

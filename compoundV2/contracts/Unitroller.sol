@@ -4,7 +4,7 @@ import "./ErrorReporter.sol";
 import "./ComptrollerStorage.sol";
 
 /**
- * @title ComptrollerCore
+ * @title ComptrollerCore 这是审计合约的代理合约
  * @dev 审计员的存储在这个地址，而执行被委托给`comptrollerImplementation`。
  * CTokens 应该将此合约作为他们的主计长。
  */

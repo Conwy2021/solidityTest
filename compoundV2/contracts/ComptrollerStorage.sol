@@ -69,7 +69,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
           */
         // 抵押率
         // 100usdc 可以抵押价值90usdc的资产 用做借贷
-        uint collateralFactorMantissa;
+        uint collateralFactorMantissa; // 实际 600000000000000000 0.6
 
         /// @notice 按市场映射“此资产中的账户”
         //  检查当前账户是否有资产
@@ -122,11 +122,11 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
     CToken[] public allMarkets;
 
     /// @notice The rate at which the flywheel distributes COMP, per block
-    // comp 分配速率
+    // 每块获取多少 comp
     uint public compRate;
 
     /// @notice The portion of compRate that each market currently receives
-    // 每个市场当前收到的comp Rate份额
+    // 每个市场的获取comp 速率
     mapping(address => uint) public compSpeeds;
 
     /// @notice The COMP market supply state for each market
@@ -138,11 +138,11 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
     mapping(address => CompMarketState) public compBorrowState;
 
     /// @notice The COMP borrow index for each market for each supplier as of the last time they accrued COMP
-    // 截至最后一次计算COMP时，每个供应商的每个市场的COMP借贷指数
+    // 用户存款获取comp 指数
     mapping(address => mapping(address => uint)) public compSupplierIndex;
 
     /// @notice The COMP borrow index for each market for each borrower as of the last time they accrued COMP
-    // 🧍各市场下，每个用户地址的指数
+    // 用户借款获取comp 指数
     mapping(address => mapping(address => uint)) public compBorrowerIndex;
 
     /// @notice The COMP accrued but not yet transferred to each user

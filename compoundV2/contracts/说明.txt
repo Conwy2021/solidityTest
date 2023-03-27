@@ -7,3 +7,44 @@ accountAssets[account]  变量 在storage 合约中记录
      * @notice 记录用户参与的资产，不区分存款和借款！！！
      */
     mapping(address => CToken[]) public accountAssets;
+	
+	 // 市场状态
+    struct CompMarketState {
+        /// @notice The market's last updated compBorrowIndex or compSupplyIndex
+        // 下标 使用率
+        uint224 index;
+
+        /// @notice The block number the index was last updated at
+        // 区块
+        uint32 block;
+    }
+	uint public compRate;  分配速率
+	
+	/// @notice  市场的初始COMP指数
+    uint224 public constant compInitialIndex = 1e36;
+	
+	更新comp奖励的地址 大致看是你借款的有多少 就奖励你多少comp 你存款的利息 有多少 就奖励你多少comp
+	borrowAllowed 借款允许
+	redeemAllowed 取款允许
+	mintAllowed   存款允许 这里检查 cToken 是否在列表里
+	seizeAllowed  清算允许  
+	transferAllowed 转账允许 ？？ 内部用的 redeemAllowedInternal 计算 内部再判断是否存在资金短缺
+	updateCompSupply 手动更新 存款 未提comp
+	updateCompBorrow 手动更新 借款 未提comp
+	
+	主网 Compound: Comptroller 地址 0x3d9819210a31b4961b30ef54be2aed79b9c9cd3b 他也用的代理模式
+	
+	collateralFactorMantissa 市场抵押率 6e17 0.6 这里和v1 不同 v1 抵押品/借贷品 比例是大于1
+	
+	这里流动性 算法 就是 用户cToken*兑换率*抵押率 和 借款 进行比较 
+	v1是借款*抵押率 然后和 存款比较
+	
+	
+	
+	redeemInternal 传入cToken数量 提取Token 
+	
+	redeemUnderlying 传入Token数量 提取Token
+	提供两种提款模式 可以根据cToken 和 Token 数量 
+	
+	v2 只能存什么 取什么 
+	但是清算可以选获取哪种用户哪种抵押品
