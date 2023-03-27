@@ -118,7 +118,7 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
      */
     // 对已经在市场的资产进行 开启 作为抵押品操作
     // 将指定多个ctoken 做为抵押品，对应的增加用户的可借额度
-    function enterMarkets(address[] memory cTokens) public returns (uint[] memory) {
+    function enterMarkets(address[] memory cTokens) public returns (uint[] memory) {// 这一步开始市场允许 需要配置市场抵押何种代币
         uint len = cTokens.length;
 
         uint[] memory results = new uint[](len);
@@ -1033,12 +1033,12 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
         // 判断使用率是否为0
         if (supplyState.index == 0) {
             // 使用默认值初始化供应状态索引
-            supplyState.index = compInitialIndex;
+            supplyState.index = compInitialIndex;//1e36
         }
 
         if (borrowState.index == 0) {
             // 使用默认值初始化供应状态索引
-            borrowState.index = compInitialIndex;
+            borrowState.index = compInitialIndex;//1e36
         }
 
         /*
@@ -1557,12 +1557,12 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
         return allMarkets;
     }
 
-    // 手动更新存款未提COMP
+    // 手动更新 存款 未提COMP
     function updateCompSupply(address cToken,address account) public {
         updateCompSupplyIndex(cToken);
         distributeSupplierComp(cToken, account);
     }
-    // 手动更新借款未提COMP
+    // 手动更新 借款 未提COMP
     function updateCompBorrow(address cToken,address account) public {
         Exp memory borrowIndex = Exp({mantissa: CToken(cToken).borrowIndex()});
         updateCompBorrowIndex(cToken, borrowIndex);
