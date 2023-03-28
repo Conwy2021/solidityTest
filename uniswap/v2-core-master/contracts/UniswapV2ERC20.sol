@@ -79,7 +79,7 @@ contract UniswapV2ERC20 is IUniswapV2ERC20 {
     }
 
     function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external {
-        require(deadline >= block.timestamp, 'UniswapV2: EXPIRED');
+        require(deadline >= block.timestamp, 'UniswapV2: EXPIRED');// 签名授权 授权需要执行交易还得花钱 用户直接线下签名，然后其他人就能帮你把你授权给自己
         bytes32 digest = keccak256(
             abi.encodePacked(
                 '\x19\x01',
@@ -87,7 +87,7 @@ contract UniswapV2ERC20 is IUniswapV2ERC20 {
                 keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))//nonces[owner]++ 先取值使用
             )
         );
-        address recoveredAddress = ecrecover(digest, v, r, s);
+        address recoveredAddress = ecrecover(digest, v, r, s);//这里计算错误 回返回0地址
         require(recoveredAddress != address(0) && recoveredAddress == owner, 'UniswapV2: INVALID_SIGNATURE');
         _approve(owner, spender, value);
     }

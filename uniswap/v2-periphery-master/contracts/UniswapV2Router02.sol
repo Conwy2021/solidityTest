@@ -257,7 +257,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         ensure(deadline)
         returns (uint[] memory amounts)
     {
-        require(path[0] == WETH, 'UniswapV2Router: INVALID_PATH');
+        require(path[0] == WETH, 'UniswapV2Router: INVALID_PATH');// 这里不同 限制了 0 必须是weth 就是必须是weth 兑换其他
         amounts = UniswapV2Library.getAmountsOut(factory, msg.value, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         IWETH(WETH).deposit{value: amounts[0]}();
@@ -271,7 +271,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         ensure(deadline)
         returns (uint[] memory amounts)
     {
-        require(path[path.length - 1] == WETH, 'UniswapV2Router: INVALID_PATH');
+        require(path[path.length - 1] == WETH, 'UniswapV2Router: INVALID_PATH');// 这里不同 限制了 最后一个 必须是weth 就是必须 其他 兑换weth
         amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
@@ -328,7 +328,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
             { // scope to avoid stack too deep errors
             (uint reserve0, uint reserve1,) = pair.getReserves();
             (uint reserveInput, uint reserveOutput) = input == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
-            amountInput = IERC20(input).balanceOf(address(pair)).sub(reserveInput);//获取实际转账的金额
+            amountInput = IERC20(input).balanceOf(address(pair)).sub(reserveInput);//获取实际转账的金额 转pair时 就会有损耗
             amountOutput = UniswapV2Library.getAmountOut(amountInput, reserveInput, reserveOutput);
             }
             (uint amount0Out, uint amount1Out) = input == token0 ? (uint(0), amountOutput) : (amountOutput, uint(0));
