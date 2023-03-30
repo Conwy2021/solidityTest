@@ -1039,7 +1039,7 @@ contract SafeMoon is Context, IERC20, Ownable {// begin
         ) {
             contractTokenBalance = numTokensSellToAddToLiquidity;// 添加流动性是个固定值
             //add liquidity
-            swapAndLiquify(contractTokenBalance);
+            swapAndLiquify(contractTokenBalance); // 添加流动性
         }
         
         //indicates if fee should be deducted from transfer

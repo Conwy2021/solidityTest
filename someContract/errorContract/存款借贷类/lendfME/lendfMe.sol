@@ -2254,7 +2254,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
             // Market is not supported, so we don't need to calculate item 2.
             localResults.maxCloseableBorrowAmount_TargetUnderwaterAsset = min(localResults.currentBorrowBalance_TargetUnderwaterAsset, localResults.discountedBorrowDenominatedCollateral);
         }
-
+        //以上就是计算出最大的清算数量 是数量 
         // If liquidateBorrowAmount = -1, then closeBorrowAmount_TargetUnderwaterAsset = maxCloseableBorrowAmount_TargetUnderwaterAsset
         if (requestedAmountClose == uint(-1)) {
             localResults.closeBorrowAmount_TargetUnderwaterAsset = localResults.maxCloseableBorrowAmount_TargetUnderwaterAsset;// 这里就是计算 最大清算的数量（借款的代币的数量）
@@ -2263,7 +2263,7 @@ contract MoneyMarket is Exponential, SafeToken {// begin
         }
 
         // From here on, no more use of `requestedAmountClose`
-
+        // 这里判断  清算数量不能大于最大清算值
         // Verify closeBorrowAmount_TargetUnderwaterAsset <= maxCloseableBorrowAmount_TargetUnderwaterAsset
         if (localResults.closeBorrowAmount_TargetUnderwaterAsset > localResults.maxCloseableBorrowAmount_TargetUnderwaterAsset) {
             return fail(Error.INVALID_CLOSE_AMOUNT_REQUESTED, FailureInfo.LIQUIDATE_CLOSE_AMOUNT_TOO_HIGH);//平仓金额过高

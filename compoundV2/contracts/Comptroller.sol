@@ -499,7 +499,7 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
 
         /* allow accounts to be liquidated if the market is deprecated */
         // 判断是否是否被弃用 如果市场被弃用，允许清算账户
-        if (isDeprecated(CToken(cTokenBorrowed))) {
+        if (isDeprecated(CToken(cTokenBorrowed))) { // 这里指 市场不能借贷了 就可以清算所有借贷
             // 不能偿还超过借款总额
             require(borrowBalance >= repayAmount, "Can not repay more than the total borrow");
         } else {
