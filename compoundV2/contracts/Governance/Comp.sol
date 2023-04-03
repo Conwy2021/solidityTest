@@ -194,7 +194,7 @@ contract Comp {
             return 0;
         }
 
-        // First check most recent balance
+        // First check most recent balance 检查最近的余额
         if (checkpoints[account][nCheckpoints - 1].fromBlock <= blockNumber) {
             return checkpoints[account][nCheckpoints - 1].votes;
         }
@@ -243,14 +243,14 @@ contract Comp {
 
     function _moveDelegates(address srcRep, address dstRep, uint96 amount) internal {
         if (srcRep != dstRep && amount > 0) {
-            if (srcRep != address(0)) {
-                uint32 srcRepNum = numCheckpoints[srcRep];
+            if (srcRep != address(0)) { //先处理src
+                uint32 srcRepNum = numCheckpoints[srcRep];//检查点数量
                 uint96 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
                 uint96 srcRepNew = sub96(srcRepOld, amount, "Comp::_moveVotes: vote amount underflows");
                 _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
             }
 
-            if (dstRep != address(0)) {
+            if (dstRep != address(0)) {// 再处理dst
                 uint32 dstRepNum = numCheckpoints[dstRep];
                 uint96 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
                 uint96 dstRepNew = add96(dstRepOld, amount, "Comp::_moveVotes: vote amount overflows");
@@ -258,14 +258,14 @@ contract Comp {
             }
         }
     }
-
-    function _writeCheckpoint(address delegatee, uint32 nCheckpoints, uint96 oldVotes, uint96 newVotes) internal {
+    // nCheckpoints 检查点 oldVotes 之前检查点的代币数量 newVotes 新检查点的代币数量
+    function _writeCheckpoint(address delegatee, uint32 nCheckpoints, uint96 oldVotes, uint96 newVotes) internal {// 核心逻辑 
       uint32 blockNumber = safe32(block.number, "Comp::_writeCheckpoint: block number exceeds 32 bits");
 
-      if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber) {
+      if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber) {//限制了在一个区块转账时 只记录一次
           checkpoints[delegatee][nCheckpoints - 1].votes = newVotes;
       } else {
-          checkpoints[delegatee][nCheckpoints] = Checkpoint(blockNumber, newVotes);
+          checkpoints[delegatee][nCheckpoints] = Checkpoint(blockNumber, newVotes);//Checkpoint 是个结构体
           numCheckpoints[delegatee] = nCheckpoints + 1;
       }
 

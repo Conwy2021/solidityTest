@@ -245,7 +245,7 @@ contract GovernorAlpha {
         }
     }
 
-    function castVote(uint proposalId, bool support) public {
+    function castVote(uint proposalId, bool support) public {// 投票 
         return _castVote(msg.sender, proposalId, support);
     }
 
@@ -266,9 +266,9 @@ contract GovernorAlpha {
         uint96 votes = comp.getPriorVotes(voter, proposal.startBlock);
 
         if (support) {
-            proposal.forVotes = add256(proposal.forVotes, votes);
+            proposal.forVotes = add256(proposal.forVotes, votes);// 赞成票
         } else {
-            proposal.againstVotes = add256(proposal.againstVotes, votes);
+            proposal.againstVotes = add256(proposal.againstVotes, votes);// 反对票
         }
 
         receipt.hasVoted = true;

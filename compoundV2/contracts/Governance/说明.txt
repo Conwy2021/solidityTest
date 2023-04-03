@@ -1,0 +1,27 @@
+comp 治理代币 设计思路
+
+mapping (address => uint32) public numCheckpoints; 存用户的检查点数量
+
+mapping (address => mapping (uint32 => Checkpoint)) public checkpoints; 存用户每个检查点的 代币数量 和对应的区块号
+
+struct Checkpoint {
+        uint32 fromBlock;
+        uint96 votes;
+    }
+初始化代币时 直接更改的是底层数据 直接在balances 加的
+
+用户在没有代币时 检查点为0  checkpoints 0，0 时 Checkpoint为0
+
+第一次 接受代币是 更新检查点0的数据 为获取的代币数量 和 获取时的区块号  并更新numCheckpoints 为1。
+
+用户记录 表
+检查点	    0	1	2	3	4
+代币数量	56	78	45	89	1
+区块号	    10	24	45	67	88
+
+获取指定区块拥有代币数量
+ 
+第5区块  拥有0 代币 
+第12区块 拥有56 代币
+
+第90区块 拥有1 代币
