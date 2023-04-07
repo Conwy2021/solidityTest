@@ -225,6 +225,7 @@ mapping(address => uint256) balances;　　// 类比一维数组
 web3语法相关
 查看合约变量 （地址，下标）
 在remix 控制台 执行web3.eth.getStorageAt("0x260a7Fe2f46053518E061e96A9e2a88dBfcab2A6",1); 
+坑 本地测 插槽 是查不到值 估计本地存储 有自己逻辑 需要连测试网 才能查到
 
 查看后续位置的
 web3.eth.getStorageAt("0x13b9cE1ee6b112FB896b021d2A1955ce0C184FcA","0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563");
