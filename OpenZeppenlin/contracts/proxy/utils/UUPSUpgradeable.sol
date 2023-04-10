@@ -20,7 +20,7 @@ import "../ERC1967/ERC1967Upgrade.sol";
  */
 abstract contract UUPSUpgradeable is IERC1822Proxiable, ERC1967Upgrade {
     /// @custom:oz-upgrades-unsafe-allow state-variable-immutable state-variable-assignment
-    address private immutable __self = address(this);
+    address private immutable __self = address(this);// 这个变量在字节码中，所以在代理模式时 存的就是逻辑合约地址 这种常量会在编译时 放到字节码里
 
     /**
      * @dev Check that the execution is being performed through a delegatecall call and that the execution context is
@@ -63,7 +63,7 @@ abstract contract UUPSUpgradeable is IERC1822Proxiable, ERC1967Upgrade {
      *
      * Emits an {Upgraded} event.
      */
-    function upgradeTo(address newImplementation) external virtual onlyProxy {
+    function upgradeTo(address newImplementation) external virtual onlyProxy {// onlyProxy 限制 此方法不能是 逻辑合约调用 代理合约中的逻辑合约地址是逻辑地址
         _authorizeUpgrade(newImplementation);
         _upgradeToAndCallUUPS(newImplementation, new bytes(0), false);
     }

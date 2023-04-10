@@ -567,7 +567,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         }
         
         // 累加借款指数
-        // 区块之间产生的总利率 * 借款指数 + 借款指数
+        // 区块之间产生的总利率 * 借款指数 + 借款指数 等价于 借贷指数*（1+区块之间产生的总利率）
         // // console.log("simpleInterestFactor, borrowIndexPrior, borrowIndexPrior",simpleInterestFactor, borrowIndexPrior, borrowIndexPrior);
         (mathErr, borrowIndexNew) = mulScalarTruncateAddUInt(simpleInterestFactor, borrowIndexPrior, borrowIndexPrior);
         if (mathErr != MathError.NO_ERROR) {

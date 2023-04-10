@@ -12,7 +12,7 @@ import "./ERC1967Upgrade.sol";
  * https://eips.ethereum.org/EIPS/eip-1967[EIP1967], so that it doesn't conflict with the storage layout of the
  * implementation behind the proxy.
  */
-contract ERC1967Proxy is Proxy, ERC1967Upgrade {
+contract ERC1967Proxy is Proxy, ERC1967Upgrade {//UUPS代理合约入口 remix 部署时 也是部署的这个
     /**
      * @dev Initializes the upgradeable proxy with an initial implementation specified by `_logic`.
      *

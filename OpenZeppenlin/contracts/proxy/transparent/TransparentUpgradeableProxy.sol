@@ -26,7 +26,7 @@ import "../ERC1967/ERC1967Proxy.sol";
  * Our recommendation is for the dedicated account to be an instance of the {ProxyAdmin} contract. If set up this way,
  * you should think of the `ProxyAdmin` instance as the real administrative interface of your proxy.
  */
-contract TransparentUpgradeableProxy is ERC1967Proxy {
+contract TransparentUpgradeableProxy is ERC1967Proxy {// 透明代理合约 这里多个了配置admin合约 和更换逻辑合约地址
     /**
      * @dev Initializes an upgradeable proxy managed by `_admin`, backed by the implementation at `_logic`, and
      * optionally initialized with `_data` as explained in {ERC1967Proxy-constructor}.
@@ -92,7 +92,7 @@ contract TransparentUpgradeableProxy is ERC1967Proxy {
      *
      * NOTE: Only the admin can call this function. See {ProxyAdmin-upgrade}.
      */
-    function upgradeTo(address newImplementation) external ifAdmin {
+    function upgradeTo(address newImplementation) external ifAdmin {//更新逻辑合约地址 需要admin权限
         _upgradeToAndCall(newImplementation, bytes(""), false);
     }
 

@@ -72,7 +72,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
      * @dev 新实现的管理功能接受它作为实现的角色
      */
     //  * @return uint 0=成功，否则失败（详见ErrorReporter.sol）
-    function _acceptImplementation() public returns (uint) {
+    function _acceptImplementation() public returns (uint) {//更换实现合约地址
         // Check caller is pendingImplementation and pendingImplementation ≠ address(0)
         if (
             msg.sender != pendingComptrollerImplementation ||

@@ -76,12 +76,12 @@ abstract contract Initializable {
      * `onlyInitializing` functions can be used to initialize parent contracts. Equivalent to `reinitializer(1)`.
      */
     modifier initializer() {
-        bool isTopLevelCall = !_initializing;
+        bool isTopLevelCall = !_initializing;//_initializing 初始为0 
         require(
             (isTopLevelCall && _initialized < 1) || (!Address.isContract(address(this)) && _initialized == 1),
             "Initializable: contract is already initialized"
         );
-        _initialized = 1;
+        _initialized = 1;// _initialized 初始为0
         if (isTopLevelCall) {
             _initializing = true;
         }
