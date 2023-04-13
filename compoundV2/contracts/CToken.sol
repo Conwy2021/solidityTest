@@ -259,7 +259,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         if (mErr != MathError.NO_ERROR) {
             return (uint(Error.MATH_ERROR), 0, 0, 0);
         }
-        // 获取存款汇率
+        // 获取兑换率
         (mErr, exchangeRateMantissa) = exchangeRateStoredInternal();
         // console.log("exchangeRateMantissa 存款汇率", exchangeRateMantissa);
         if (mErr != MathError.NO_ERROR) {
@@ -453,7 +453,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
             }
             // console.log("cashPlusBorrowsMinusReserves", cashPlusBorrowsMinusReserves);
             // 流通量总数
-            // 存款利率 = 现金加借贷减储备 / 流通代币总数
+            // 兑换率 = 现金加借贷减储备 / 流通代币总数
             (mathErr, exchangeRate) = getExp(cashPlusBorrowsMinusReserves, _totalSupply);
             if (mathErr != MathError.NO_ERROR) {
                 return (mathErr, 0);
@@ -544,7 +544,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         // 总借款在区块之间产生的利息总数
         // simpleInterestFactor * borrowsPrior（总借款额度）
         console.log("simpleInterestFactor, borrowsPrior", simpleInterestFactor.mantissa, borrowsPrior);
-        (mathErr, interestAccumulated) = mulScalarTruncate(simpleInterestFactor, borrowsPrior);
+        (mathErr, interestAccumulated) = mulScalarTruncate(simpleInterestFactor, borrowsPrior);//interestAccumulated 总借款利息
         if (mathErr != MathError.NO_ERROR) {
             return failOpaque(Error.MATH_ERROR, FailureInfo.ACCRUE_INTEREST_ACCUMULATED_INTEREST_CALCULATION_FAILED, uint(mathErr));
         }
@@ -552,7 +552,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         // 计算区块之间利息总数+总借款额度
         // 利息总数 + 总借款额度 = 借款总总数
         console.log("interestAccumulated, borrowsPrior",interestAccumulated, borrowsPrior);
-        (mathErr, totalBorrowsNew) = addUInt(interestAccumulated, borrowsPrior);
+        (mathErr, totalBorrowsNew) = addUInt(interestAccumulated, borrowsPrior);//借款利息 + 借款本金 = 新的借款本金
         if (mathErr != MathError.NO_ERROR) {
             return failOpaque(Error.MATH_ERROR, FailureInfo.ACCRUE_INTEREST_NEW_TOTAL_BORROWS_CALCULATION_FAILED, uint(mathErr));
         }
@@ -698,7 +698,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         accountTokens[minter] = vars.accountTokensNew;
 
         /* We emit a Mint event, and a Transfer event */
-        emit Mint(minter, vars.actualMintAmount, vars.mintTokens);
+        emit Mint(minter, vars.actualMintAmount, vars.mintTokens);//actualMintAmount存入的数量 mintTokens 是指ctoken数量
         emit Transfer(address(this), minter, vars.mintTokens);
 
         /* We call the defense hook */
@@ -776,7 +776,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         RedeemLocalVars memory vars;
 
         /* exchangeRate = invoke Exchange Rate Stored() */
-        // 获取存款汇率
+        // 获取兑换汇率
         (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
         if (vars.mathErr != MathError.NO_ERROR) {
             return failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_RATE_READ_FAILED, uint(vars.mathErr));
@@ -786,7 +786,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         // 赎回cToken大于 0 
         // 根据cToken算能换多少标的资产数量
         // 要么输入cToken 要么 输入标的资产 肯定只能存在一个。
-        if (redeemTokensIn > 0) {
+        if (redeemTokensIn > 0) {// 按ctoken赎回
             /*
              * 计算兑换率和待赎回标的金额：
              *  redeemTokens = redeemTokensIn
@@ -794,7 +794,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
             vars.redeemTokens = redeemTokensIn;
             // redeemAmount = redeemTokensIn x exchangeRateCurrent
 
-            // 标的资产数量 == 存款利率 * 全部额度
+            // 标的资产数量 == 兑换率 * 全部额度
             (vars.mathErr, vars.redeemAmount) = mulScalarTruncate(Exp({mantissa: vars.exchangeRateMantissa}), redeemTokensIn);
             // console.log("vars.redeemAmount > 0", vars.redeemAmount);
             if (vars.mathErr != MathError.NO_ERROR) {
@@ -821,7 +821,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         // console.log("vars.redeemAmount 价格",vars.redeemAmount);
 
         /* Fail if redeem not allowed */
-        // 检查账户是否允许兑换
+        // 检查账户是否允许提款
         uint allowed = comptroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
         if (allowed != 0) {
             return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.REDEEM_COMPTROLLER_REJECTION, allowed);
@@ -1358,7 +1358,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         // 此次清算激励？？的总数 =  seizeTokens - vars.protocolSeizeTokens
         vars.liquidatorSeizeTokens = sub_(seizeTokens, vars.protocolSeizeTokens);//protocolSeizeTokens 是 储备金
 
-        // 获取存款汇率
+        // 获取兑换率
         (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
         require(vars.mathErr == MathError.NO_ERROR, "exchange rate math error");
         // 扣押总量  = 存款汇率 * cToken总额(获取cToken的总量+清算激励)

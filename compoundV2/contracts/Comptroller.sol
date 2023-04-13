@@ -771,7 +771,7 @@ contract Comptroller is ComptrollerV7Storage, ComptrollerInterface, ComptrollerE
                 vars.cTokenBalance, //  cToken额度
                 vars.borrowBalance, //  借款额度
                 vars.exchangeRateMantissa   //  汇率
-            ) = asset.getAccountSnapshot(account);
+            ) = asset.getAccountSnapshot(account); //计算用户拥有每个cToken 的对应的存款数量和借贷数量
             if (oErr != 0) { // semi-opaque error code, we assume NO_ERROR == 0 is invariant between upgrades
                 return (Error.SNAPSHOT_ERROR, 0, 0);
             }

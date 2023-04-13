@@ -11,7 +11,7 @@ contract MyToken is Initializable, ERC20Upgradeable, OwnableUpgradeable, UUPSUpg
     uint public test;
     uint private pri;
     constructor() {
-        _disableInitializers();
+        _disableInitializers();//限制了逻辑合约不能初始化
     }
 
     function initialize() initializer public {
