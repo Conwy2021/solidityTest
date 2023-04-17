@@ -887,7 +887,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
     */
     // 借钱 需要先有存款额度
     // 借款功能将资产从货币市场转移到使用者手中，其作用是根据借入资产的当前借款利率开始利息累积。
-    function borrowInternal(uint borrowAmount) internal nonReentrant returns (uint) {
+    function borrowInternal(uint borrowAmount) internal nonReentrant returns (uint) {// conwy 借
         //  计算 借款利率
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
