@@ -836,12 +836,12 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
          * 计算新的总供应和赎回余额，并检查下溢：
          */
         // totalSupplyNew = totalSupply - redeemTokens
-        (vars.mathErr, vars.totalSupplyNew) = subUInt(totalSupply, vars.redeemTokens);
+        (vars.mathErr, vars.totalSupplyNew) = subUInt(totalSupply, vars.redeemTokens);//更新ctoken 总量
         if (vars.mathErr != MathError.NO_ERROR) {
             return failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_NEW_TOTAL_SUPPLY_CALCULATION_FAILED, uint(vars.mathErr));
         }
-        // accountTokensNew = accountTokens[redeemer] - redeemTokens
-        (vars.mathErr, vars.accountTokensNew) = subUInt(accountTokens[redeemer], vars.redeemTokens);
+        // accountTokensNew = accountTokens[redeemer] - redeemTokens // redeemTokens 是ctoken 数量
+        (vars.mathErr, vars.accountTokensNew) = subUInt(accountTokens[redeemer], vars.redeemTokens);// 更新用户的ctoken数量
         if (vars.mathErr != MathError.NO_ERROR) {
             return failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_NEW_ACCOUNT_BALANCE_CALCULATION_FAILED, uint(vars.mathErr));
         }
@@ -849,7 +849,7 @@ contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         /* Fail gracefully if protocol has insufficient cash */
         // 计算价格
         // console.log("vars.redeemAmount 价格", vars.redeemAmount);
-        if (getCashPrior() < vars.redeemAmount) {
+        if (getCashPrior() < vars.redeemAmount) {// tokend的数量
             return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.REDEEM_TRANSFER_OUT_NOT_POSSIBLE);
         }
 
