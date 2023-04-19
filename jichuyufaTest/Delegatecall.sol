@@ -16,6 +16,10 @@ contract C {
         sender = msg.sender;
         console.log("_num is",type(uint).max);
     }
+    function deleteContract() external {
+        // 调用selfdestruct销毁合约，并把剩余的ETH转给msg.sender
+        selfdestruct(payable(msg.sender));
+    }
 }
 
 // 发起delegatecall的合约B
@@ -29,6 +33,7 @@ contract B {
         (bool success, bytes memory data) = _addr.call(
             abi.encodeWithSignature("setVars(uint256)", _num)
         );
+        console.log(success);
     }
     // 通过delegatecall来调用C的setVars()函数，将改变合约B里的状态变量
     function delegatecallSetVars(address _addr, uint _num) external payable{
@@ -36,5 +41,14 @@ contract B {
         (bool success, bytes memory data) = _addr.delegatecall(
             abi.encodeWithSignature("setVars(uint256)", _num)
         );
+        console.log(success);
+    }
+
+    function TWOdelegatecallSetVars(address _addr, uint _num) external payable{
+        // delegatecall setVars()
+        (bool success, bytes memory data) = _addr.delegatecall(
+            abi.encodeWithSignature("setVars2(uint256)", _num)
+        );
+        console.log(success);
     }
 }
