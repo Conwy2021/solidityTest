@@ -44,6 +44,9 @@ windows 命令
 windows 进入控制台
 .\roninWindows.exe attach 'http://localhost:8551'
 
+进入控制台 管道方式
+ geth attach geth.ipc
+ 
 --eth 源码相关--
 
 api注册 一般都是每个模块的api.go中 然后找到注册函数 一般是tpye 下面的NEW...函数 一这个eth 转账相关函数 为例子 就是func NewPublicEthereumAPI(b Backend) *PublicEthereumAPI
