@@ -43,10 +43,12 @@ windows 命令
 --ipcpath data5/geth5.ipc 知道ipc ipc路径 在日志查看 日志-> IPC endpoint opened                      url=\\.\pipe\data5/geth5.ipc
 windows 进入控制台
 .\roninWindows.exe attach 'http://localhost:8551'
-
+节点通信启动命令
+./bootnode -genkey boot.key
+./bootnode -nodekey boot.key -verbosity 9 -addr :30310
 进入控制台 管道方式
  geth attach geth.ipc
- 
+
 --eth 源码相关--
 
 api注册 一般都是每个模块的api.go中 然后找到注册函数 一般是tpye 下面的NEW...函数 一这个eth 转账相关函数 为例子 就是func NewPublicEthereumAPI(b Backend) *PublicEthereumAPI
