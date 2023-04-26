@@ -25,7 +25,7 @@ network.inboud: true true 是站内连接 false 是站外连接
 创建用户
 geth.exe --datadir node1 account new
 初始化节点
-geth --datadir ../data init genesis.json
+geth --datadir ./node1 init genesis.json
 启动命令说明
 --http --http.corsdomain="*" 跨域 使用浏览器可以访问节点  
 --http.port 8545 --http.addr "0.0.0.0" --http.api web3,eth,debug,personal,net  启动的模块
@@ -45,7 +45,7 @@ windows 进入控制台
 .\roninWindows.exe attach 'http://localhost:8551'
 节点通信启动命令
 ./bootnode -genkey boot.key
-./bootnode -nodekey boot.key -verbosity 9 -addr :30310
+./bootnode -nodekey boot.key -verbosity 9 -addr :30310 注意addr 后面要有空格
 进入控制台 管道方式
  geth attach geth.ipc
 
