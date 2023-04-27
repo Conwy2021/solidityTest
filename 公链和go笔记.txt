@@ -47,7 +47,7 @@ windows 进入控制台
 ./bootnode -genkey boot.key
 ./bootnode -nodekey boot.key -verbosity 9 -addr :30310 注意addr 后面要有空格
 进入控制台 管道方式
- geth attach geth.ipc
+ .\geth.exe attach ipc:\\.\pipe\node2/geth2.ipc
 
 --eth 源码相关--
 
