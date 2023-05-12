@@ -141,3 +141,34 @@ Ctrl+Q 继续屏幕输出
 
 
 
+手动修改验证者 代码
+address[]  public users ;
+  uint8 public users_count;
+  function getValidators()  external  override view returns(address[] memory) {
+      uint len = users.length;
+       address[] memory users2 = new address[](len);
+      for(uint i=0;i<len;i++){
+        if(users[i]!=address(0)){
+        users2[i]=users[i];
+        }
+      }
+
+      return users2;
+  
+  }
+
+  function addValidators(address _user)  external   {
+    require(users_count < 5, "number of users is limited to 10");
+        //users[users_count] = _user;
+        users.push(_user);
+        users_count++;
+    
+  }
+
+  function delValidators()  external   {
+        
+        //users[users_count] = _user;
+        users.pop();
+        users_count--;
+    
+  }
