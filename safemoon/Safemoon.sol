@@ -957,7 +957,7 @@ contract SafeMoon is Context, IERC20, Ownable {// begin
             rSupply = rSupply.sub(_rOwned[_excluded[i]]);
             tSupply = tSupply.sub(_tOwned[_excluded[i]]);
         }
-        if (rSupply < _rTotal.div(_tTotal)) return (_rTotal, _tTotal);//极端情况 通常情况不会进入
+        if (rSupply < _rTotal.div(_tTotal)) return (_rTotal, _tTotal);//极端情况 通常情况不会进入  这里假设所有人都除外的了 能进来
         return (rSupply, tSupply);
     }
     
