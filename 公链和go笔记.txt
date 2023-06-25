@@ -112,8 +112,8 @@ idea 配置go 项目
 setting 设置中 go 下面
 goroot go的路径 一般安装好go 后 idea 会自己找到的 目录D:\soft\go
 gopath 可以每个项指定一个自己的gopath 也可用全局的 这里使用projiect GOPATH 设置到自己项目目录下 D:\work\projectTest\go-ethereum\gopath 不勾选 use GOPATH that's defined .... 和 index entire ..
-GO Moudules(vgo) 勾选 enable Go Modules ...  proxy 设置为https://mirrors.aliyun.com/goproxy/,direct 不勾选 Vendoring mode （如果项目使用vendor 管理依赖 就勾选下）
-
+GO Moudules(vgo) 勾选 enable Go Modules ...  proxy 设置为GOPROXY=https://mirrors.aliyun.com/goproxy/,direct 不勾选 Vendoring mode （如果项目使用vendor 管理依赖 就勾选下）
+代理报错 就换一个https://goproxy.cn,direct
 编译geth 时 在cmd 控制台编译  此报错不影响打包 大致原因是go版本的问题 可忽略
 duk_minimal_printf.c: In function 'duk__parse_pointer':
 duk_minimal_printf.c:126:9: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
